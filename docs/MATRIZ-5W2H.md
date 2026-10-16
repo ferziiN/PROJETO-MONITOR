@@ -222,3 +222,24 @@ Os documentos possuem informações complementares e, em alguns casos, sobrepost
 - **Documentacao_Inicial_Monitor.pdf** como referência acadêmica complementar.
 
 *Documento gerado em 30/09/2026 com base na documentação do projeto Monitor.*
+
+---
+
+## RESULTADOS DO PITCH (PROF: GLENDER)
+
+Durante a apresentação do Pitch do projeto para o **Prof. Glender**, a equipe foi questionada sobre o potencial impacto de desempenho gerado pelas requisições:
+
+> *"O servidor não ficaria mais lento por conta das requisições que seriam enviadas para o nosso software?"*
+
+Registramos esta observação e as decisões técnicas correspondentes no planejamento para sanar quaisquer dúvidas sobre o funcionamento, desempenho e arquitetura da solução:
+
+### 1. Impacto no Servidor Monitorado (Destino / Cliente)
+* **Volume Irrisório de Tráfego:** Servidores web em produção processam dezenas, centenas ou milhares de requisições por segundo. As checagens do Monitor ocorrem em intervalos periódicos e espaçados (ex.: a cada 30 segundos, 1 minuto ou 5 minutos), representando uma carga estatisticamente desprezível (menos de 0,01% da capacidade do servidor de destino).
+* **Verificações Otimizadas e Leves:** As checagens são direcionadas preferencialmente para endpoints específicos de diagnóstico (*health checks*, como `/health` ou `/ping`) ou utilizam métodos como HTTP `HEAD`, que avaliam apenas os cabeçalhos de resposta sem trafegar o corpo (payload) da página.
+* **Timeout Curto:** Configuração de limites estritos de tempo de resposta (ex.: 5 segundos), impedindo que conexões lentas ou instáveis fiquem retidas consumindo sockets do servidor monitorado.
+
+### 2. Impacto no Servidor da Aplicação (Projeto Monitor)
+* **I/O Não Bloqueante e Assíncrono (.NET `async/await`):** As requisições de saída são operações *I/O-bound*. O runtime do .NET libera as threads do *thread pool* durante a espera pela resposta da rede, mantendo os recursos livres para atender o dashboard e outras operações.
+* **Execução em Segundo Plano ([RNF01](file:///c:/Users/sync/Desktop/ProjetosPessoais/ProjetoMonitor/docs/MATRIZ-5W2H.md#L41-L48)):** As rotinas periódicas de checagem rodam de forma desacoplada através de um serviço em segundo plano (`BackgroundService`), garantindo que o processamento das verificações não degrade a responsividade da API REST e da interface web.
+* **Gestão de Sockets e Concorrência:** O uso de `IHttpClientFactory` gerencia o ciclo de vida dos sockets e previne problemas comuns como *socket exhaustion*, enquanto técnicas de paralelismo controlado evitam sobrecarga de conexões simultâneas.
+
