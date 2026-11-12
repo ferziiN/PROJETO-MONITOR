@@ -10,13 +10,13 @@
 | Item | Status |
 |---|---|
 | Documentação de escopo | ✅ Concluída |
-| Estrutura de pastas | ✅ Criada (diretórios vazios) |
+| Estrutura de pastas | ✅ Criada |
 | Repositório Git / GitHub | ✅ Configurado |
-| Código back-end | ❌ Não iniciado |
-| Código front-end | ❌ Não iniciado |
-| Infraestrutura (Docker/Nginx) | ❌ Não iniciado |
+| Código back-end | ✅ Concluído (Sprints 1 e 2 — CRUD + Motor de Monitoramento) |
+| Código front-end | ✅ Base inicial criada (Sprint 3 — Dashboard, Cadastro e Detalhes) |
+| Infraestrutura (Docker/Nginx) | 🔄 Parcial (`docker-compose.dev.yml` para PostgreSQL local) |
 
-> A Fase 1 (Planejamento) está essencialmente concluída. O próximo passo concreto é **começar a codar**.
+> As Fases 1, 2, 3 e a base da Fase 4 estão implementadas. O próximo passo é validar com o PostgreSQL ativo e avançar para a containerização completa (Sprint 4).
 
 ---
 
@@ -47,13 +47,13 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 - [✅] Validar que o projeto compila e roda (`dotnet run`)
 
 #### 1.2 — Configurar o banco de dados
-- [ ] Instalar o PostgreSQL localmente (ou via Docker Compose para dev)
-- [ ] Adicionar pacotes NuGet: `Npgsql.EntityFrameworkCore.PostgreSQL`, `Microsoft.EntityFrameworkCore.Tools`
-- [ ] Criar a connection string no `appsettings.Development.json`
-- [ ] Criar o `MonitorDbContext` em `Data/`
+- [ ] Instalar o PostgreSQL localmente (ou subir `infra/docker/docker-compose.dev.yml`)
+- [✅] Adicionar pacotes NuGet: `Npgsql.EntityFrameworkCore.PostgreSQL`, `Microsoft.EntityFrameworkCore.Design`
+- [✅] Criar a connection string no `appsettings.Development.json`
+- [✅] Criar o `MonitorDbContext` em `Data/`
 
 #### 1.3 — Modelar as entidades
-- [ ] Criar a entidade `Servico` em `Models/` com os campos:
+- [✅] Criar a entidade `Servico` em `Models/` com os campos:
   - `Id` (Guid ou int)
   - `Nome`
   - `Endereco` (IP ou domínio)
@@ -63,28 +63,28 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
   - `IntervaloSegundos`
   - `Ativo` (bool)
   - `CriadoEm`, `AtualizadoEm`
-- [ ] Criar a entidade `Verificacao` em `Models/`:
+- [✅] Criar a entidade `Verificacao` em `Models/`:
   - `Id`
   - `ServicoId` (FK)
   - `Status` (Online / Offline / Atencao)
   - `TempoRespostaMs`
   - `VerificadoEm`
   - `MensagemErro` (nullable)
-- [ ] Criar as configurações Fluent API em `Data/Configurations/`
+- [✅] Criar as configurações Fluent API em `Data/Configurations/`
 
 #### 1.4 — Criar Migrations e aplicar
-- [ ] Gerar migration inicial (`dotnet ef migrations add InitialCreate`)
-- [ ] Aplicar migration (`dotnet ef database update`)
+- [✅] Gerar migration inicial (`dotnet ef migrations add InitialCreate`)
+- [ ] Aplicar migration (`dotnet ef database update` ou automática ao iniciar a API com PostgreSQL ativo)
 
 #### 1.5 — Criar DTOs
-- [ ] `CriarServicoRequest`
-- [ ] `AtualizarServicoRequest`
-- [ ] `ServicoResponse`
-- [ ] `VerificacaoResponse`
+- [✅] `CriarServicoRequest`
+- [✅] `AtualizarServicoRequest`
+- [✅] `ServicoResponse`
+- [✅] `VerificacaoResponse`
 
 #### 1.6 — Criar o CRUD de Serviços
-- [ ] Criar `IServicoService` e `ServicoService` em `Services/`
-- [ ] Criar `ServicosController` em `Controllers/`
+- [✅] Criar `IServicoService` e `ServicoService` em `Services/`
+- [✅] Criar `ServicosController` em `Controllers/`
   - `POST /api/servicos` — Cadastrar
   - `GET /api/servicos` — Listar todos
   - `GET /api/servicos/{id}` — Buscar por ID
@@ -105,27 +105,27 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 **Depende de:** Sprint 1 concluída
 
 #### 2.1 — Criar o serviço de verificação
-- [ ] Criar `IMonitoramentoService` e `MonitoramentoService` em `Services/`
-- [ ] Implementar a lógica de requisição HTTP/HTTPS ao endereço do serviço
-- [ ] Definir timeout configurável
-- [ ] Tratar respostas:
+- [✅] Criar `IMonitoramentoService` e `MonitoramentoService` em `Services/`
+- [✅] Implementar a lógica de requisição HTTP/HTTPS ao endereço do serviço (`VerificadorHttp`)
+- [✅] Definir timeout configurável
+- [✅] Tratar respostas:
   - Resposta com sucesso (2xx) → **Online**
   - Timeout ou erro de conexão → **Offline**
   - Resposta lenta (acima de threshold) → **Atenção** (opcional nesta fase)
-- [ ] Registrar tempo de resposta em milissegundos
-- [ ] Salvar o resultado como `Verificacao` no banco
+- [✅] Registrar tempo de resposta em milissegundos
+- [✅] Salvar o resultado como `Verificacao` no banco
 
 #### 2.2 — Implementar verificações periódicas
-- [ ] Criar um `BackgroundService` (Hosted Service) que:
+- [✅] Criar um `BackgroundService` (Hosted Service — `MonitoramentoWorker`) que:
   - Busca todos os serviços ativos
   - Executa a verificação de cada serviço no intervalo configurado
   - Roda de forma assíncrona e não bloqueia a API
-- [ ] Implementar lógica para respeitar o intervalo individual de cada serviço
+- [✅] Implementar lógica para respeitar o intervalo individual de cada serviço
 
 #### 2.3 — Criar endpoints de consulta de status
-- [ ] `GET /api/servicos/{id}/status` — Status atual (última verificação)
-- [ ] `GET /api/servicos/{id}/verificacoes` — Histórico de verificações
-- [ ] `GET /api/dashboard` — Resumo geral (total de serviços, online, offline)
+- [✅] `GET /api/servicos/{id}/status` — Status atual (última verificação)
+- [✅] `GET /api/servicos/{id}/verificacoes` — Histórico de verificações
+- [✅] `GET /api/dashboard` — Resumo geral (total de serviços, online, offline)
 
 ### ✅ Marco da Sprint 2
 > **O sistema monitora automaticamente os serviços cadastrados e registra resultados no banco. É possível consultar o status via API.**
@@ -141,33 +141,33 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 **Depende de:** Sprint 2 concluída (API com dados reais)
 
 #### 3.1 — Estrutura base do front-end
-- [ ] Criar `index.html` na raiz de `src/frontend/` ou em `pages/`
-- [ ] Criar os arquivos CSS base em `css/` (reset, variáveis, layout)
-- [ ] Criar o arquivo JS principal em `js/` (módulo de comunicação com a API)
+- [✅] Criar `index.html` na raiz de `src/frontend/` ou em `pages/`
+- [✅] Criar os arquivos CSS base em `css/` (reset, variáveis, layout)
+- [✅] Criar o arquivo JS principal em `js/` (módulo de comunicação com a API)
 
 #### 3.2 — Página do Dashboard
-- [ ] Exibir contadores de resumo (total, online, offline)
-- [ ] Listar serviços monitorados em uma tabela/cards com:
+- [✅] Exibir contadores de resumo (total, online, offline)
+- [✅] Listar serviços monitorados em uma tabela/cards com:
   - Nome do serviço
   - Status (com indicador visual colorido 🟢🔴🟡)
   - Tempo de resposta
   - Última verificação
-- [ ] Atualização automática dos dados (polling a cada X segundos)
+- [✅] Atualização automática dos dados (polling a cada X segundos)
 
 #### 3.3 — Página de cadastro de serviços
-- [ ] Formulário para criar novo serviço
-- [ ] Validação básica dos campos
-- [ ] Feedback visual de sucesso/erro
+- [✅] Formulário para criar novo serviço
+- [✅] Validação básica dos campos
+- [✅] Feedback visual de sucesso/erro
 
 #### 3.4 — Página de detalhes do serviço
-- [ ] Exibir informações completas do serviço
-- [ ] Listar histórico recente de verificações
-- [ ] Botão para ativar/desativar monitoramento
-- [ ] Botão para editar/excluir
+- [✅] Exibir informações completas do serviço
+- [✅] Listar histórico recente de verificações
+- [✅] Botão para ativar/desativar monitoramento
+- [✅] Botão para editar/excluir
 
 #### 3.5 — Configurar CORS na API
-- [ ] Habilitar CORS no back-end para permitir chamadas do front-end
-- [ ] Servir arquivos estáticos (se necessário durante dev)
+- [✅] Habilitar CORS no back-end para permitir chamadas do front-end
+- [✅] Servir arquivos estáticos (se necessário durante dev)
 
 ### ✅ Marco da Sprint 3
 > **Dashboard visual funcionando. Usuário consegue ver status dos serviços, cadastrar novos serviços e visualizar detalhes, tudo pelo navegador.**

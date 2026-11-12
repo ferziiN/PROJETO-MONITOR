@@ -1,42 +1,45 @@
-// Inicializa a API ASP.NET Core e prepara os serviços e endpoints básicos do template, usando um template clássico de API DOTNET 
+// Ponto de entrada da API do Monitor (ASP.NET Core).
+// Os registros de dependências ficam em Infra/ConfiguracaoExtensions.cs.
+using Monitor.API.Infra;
+using Monitor.API.Services;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// ---------------------------------------------------------------------------
+// Serviços (injeção de dependência)
+// ---------------------------------------------------------------------------
+builder.Services
+    .AdicionarApi()
+    .AdicionarBancoDeDados(builder.Configuration)
+    .AdicionarMonitoramento(builder.Configuration)
+    .AdicionarCors(builder.Configuration);
+
+builder.Services.AddScoped<IServicoService, ServicoService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ---------------------------------------------------------------------------
+// Pipeline HTTP
+// ---------------------------------------------------------------------------
+app.UseExceptionHandler();   // erros não tratados viram ProblemDetails (JSON)
+app.UseStatusCodePages();
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi();              // /openapi/v1.json
+    app.MapScalarApiReference();   // /scalar — interface para testar os endpoints
+    app.UsarFrontendEstatico();    // serve src/frontend em http://localhost:5094/
 }
 
-app.UseHttpsRedirection();
+// Obs.: sem UseHttpsRedirection — em produção o TLS é encerrado no Nginx (proxy reverso).
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseCors(ConfiguracaoExtensions.PoliticaCors);
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapControllers();
+app.MapHealthChecks("/health");
+
+await app.AplicarMigrationsAsync();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

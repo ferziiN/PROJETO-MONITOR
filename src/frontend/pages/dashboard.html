@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · Monitor</title>
+  <link rel="stylesheet" href="../css/base.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
+    <nav class="menu">
+      <a href="dashboard.html" class="ativo">Dashboard</a>
+      <a href="servico-form.html">Novo serviço</a>
+    </nav>
+  </header>
+
+  <main class="conteudo">
+    <div class="cabecalho-pagina">
+      <div>
+        <h1>Visão geral</h1>
+        <p class="subtitulo" id="ultima-atualizacao">Carregando…</p>
+      </div>
+      <div class="acoes">
+        <button class="botao" id="btn-atualizar">↻ Atualizar</button>
+        <a class="botao primario" href="servico-form.html">+ Novo serviço</a>
+      </div>
+    </div>
+
+    <div id="mensagem" class="alerta oculto"></div>
+
+    <section class="grade-resumo">
+      <div class="card resumo total">
+        <div class="rotulo">Monitorados</div>
+        <div class="valor" id="total-ativos">-</div>
+      </div>
+      <div class="card resumo online">
+        <div class="rotulo">Online</div>
+        <div class="valor" id="total-online">-</div>
+      </div>
+      <div class="card resumo offline">
+        <div class="rotulo">Offline</div>
+        <div class="valor" id="total-offline">-</div>
+      </div>
+      <div class="card resumo atencao">
+        <div class="rotulo">Atenção</div>
+        <div class="valor" id="total-atencao">-</div>
+      </div>
+      <div class="card resumo">
+        <div class="rotulo">Resposta média</div>
+        <div class="valor" id="tempo-medio">-</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Serviços</h2>
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Serviço</th>
+              <th>Status</th>
+              <th>Resposta</th>
+              <th>Última verificação</th>
+              <th>Intervalo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tabela-servicos">
+            <tr><td colspan="6" class="vazio">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="../js/dashboard.js"></script>
+</body>
+</html>
+

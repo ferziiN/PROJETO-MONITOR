@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalhes do serviço · Monitor</title>
+  <link rel="stylesheet" href="../css/base.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
+    <nav class="menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="servico-form.html">Novo serviço</a>
+    </nav>
+  </header>
+
+  <main class="conteudo">
+    <div class="cabecalho-pagina">
+      <div>
+        <h1 id="nome">Carregando…</h1>
+        <p class="subtitulo mono" id="url"></p>
+      </div>
+      <div class="acoes">
+        <button class="botao" id="btn-verificar">⚡ Verificar agora</button>
+        <button class="botao" id="btn-ativo">Pausar</button>
+        <a class="botao" id="btn-editar" href="#">Editar</a>
+        <button class="botao perigo" id="btn-excluir">Excluir</button>
+      </div>
+    </div>
+
+    <div id="mensagem" class="alerta oculto"></div>
+
+    <section class="grade-resumo">
+      <div class="card resumo">
+        <div class="rotulo">Status atual</div>
+        <div class="valor" id="status-atual" style="font-size:1.25rem">-</div>
+      </div>
+      <div class="card resumo">
+        <div class="rotulo">Última resposta</div>
+        <div class="valor" id="ultima-resposta">-</div>
+      </div>
+      <div class="card resumo online">
+        <div class="rotulo">Disponibilidade (24h)</div>
+        <div class="valor" id="disponibilidade">-</div>
+      </div>
+      <div class="card resumo">
+        <div class="rotulo">Resposta média (24h)</div>
+        <div class="valor" id="tempo-medio">-</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Configuração</h2>
+      <dl class="detalhes" id="detalhes"></dl>
+    </section>
+
+    <section class="card">
+      <h2>Histórico recente</h2>
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Data/hora</th>
+              <th>Status</th>
+              <th>Resposta</th>
+              <th>HTTP</th>
+              <th>Mensagem</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-historico">
+            <tr><td colspan="5" class="vazio">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="../js/servico-detalhe.js"></script>
+</body>
+</html>
+

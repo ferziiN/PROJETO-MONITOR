@@ -1,6 +1,76 @@
-@Monitor_API_HostAddress = http://localhost:5094
+@Monitor.API_HostAddress = http://localhost:5094
 
-GET {{Monitor_API_HostAddress}}/weatherforecast/
+### Health check da própria API (inclui conexão com o PostgreSQL)
+GET {{Monitor.API_HostAddress}}/health
+
+### Dashboard — resumo geral
+GET {{Monitor.API_HostAddress}}/api/dashboard
 Accept: application/json
 
-###
+### Listar serviços (filtros opcionais: ?ativo=true&status=Online)
+GET {{Monitor.API_HostAddress}}/api/servicos
+Accept: application/json
+
+### Cadastrar serviço
+POST {{Monitor.API_HostAddress}}/api/servicos
+Content-Type: application/json
+
+{
+  "nome": "Google",
+  "endereco": "www.google.com",
+  "porta": null,
+  "endpoint": "/",
+  "tipo": "Https",
+  "intervaloSegundos": 30,
+  "ativo": true
+}
+
+### Cadastrar serviço que vai ficar OFFLINE (porta fechada)
+POST {{Monitor.API_HostAddress}}/api/servicos
+Content-Type: application/json
+
+{
+  "nome": "API Teste (offline)",
+  "endereco": "localhost",
+  "porta": 59999,
+  "endpoint": "/health",
+  "tipo": "Http",
+  "intervaloSegundos": 30
+}
+
+### Buscar por ID
+GET {{Monitor.API_HostAddress}}/api/servicos/1
+
+### Atualizar
+PUT {{Monitor.API_HostAddress}}/api/servicos/1
+Content-Type: application/json
+
+{
+  "nome": "Google (editado)",
+  "endereco": "www.google.com",
+  "endpoint": "/",
+  "tipo": "Https",
+  "intervaloSegundos": 60,
+  "ativo": true
+}
+
+### Pausar / retomar monitoramento
+PATCH {{Monitor.API_HostAddress}}/api/servicos/1/ativo
+Content-Type: application/json
+
+{ "ativo": false }
+
+### Status atual
+GET {{Monitor.API_HostAddress}}/api/servicos/1/status
+
+### Histórico de verificações
+GET {{Monitor.API_HostAddress}}/api/servicos/1/verificacoes?limite=20
+
+### Verificar agora (manual)
+POST {{Monitor.API_HostAddress}}/api/servicos/1/verificar
+
+### Métricas (30m, 1h, 24h, 7d...)
+GET {{Monitor.API_HostAddress}}/api/servicos/1/metricas?periodo=24h
+
+### Remover
+DELETE {{Monitor.API_HostAddress}}/api/servicos/1

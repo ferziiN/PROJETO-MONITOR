@@ -25,6 +25,9 @@ ProjetoMonitor/
 Documentação geral do projeto.
 
 - `ESCOPO-PROJETO.md` → Documento de escopo completo do projeto
+- `ROADMAP-DEV.md` → Roadmap prático de sprints e tarefas da equipe
+- `MATRIZ-5W2H.md` → Análise 5W2H e respostas técnicas do Pitch
+- `ANALISE-MONITORAMENTO-COMPLETO.md` → Estudo de viabilidade para expansão com agente de métricas (CPU, RAM e disco)
 - `Documentacao_Inicial_Monitor.pdf` → Documentação inicial
 - `ESTRUTURA-PASTAS.md` → Este arquivo
 
@@ -48,13 +51,14 @@ Projeto principal da API REST, desenvolvido em C# com ASP.NET Core, Entity Frame
 
 | Pasta | Descrição |
 |---|---|
-| `Controllers/` | Endpoints da API REST (CRUD de serviços, consultas de status) |
-| `Models/` | Entidades de domínio (Serviço, Verificação, Status etc.) |
-| `DTOs/` | Data Transfer Objects — objetos de entrada e saída da API |
-| `Services/` | Regras de negócio, lógica de monitoramento e verificações periódicas |
-| `Data/` | DbContext do Entity Framework Core |
-| `Data/Configurations/` | Mapeamentos Fluent API para configuração das entidades no banco |
-| `Migrations/` | Migrations geradas pelo Entity Framework Core |
+| `Controllers/` | Endpoints da API REST (`ServicosController`, `DashboardController`) |
+| `Models/` | Entidades de domínio (`Servico`, `Verificacao`, `Enums`) |
+| `DTOs/` | Data Transfer Objects — objetos de entrada/saída e extensões de mapeamento |
+| `Services/` | Regras de negócio (`ServicoService`, `DashboardService`) e motor em `Services/Monitoramento/` |
+| `Data/` | `MonitorDbContext` do Entity Framework Core |
+| `Data/Configurations/` | Mapeamentos Fluent API (`ServicoConfiguration`, `VerificacaoConfiguration`) |
+| `Migrations/` | Migrations geradas pelo Entity Framework Core (`InitialCreate`) |
+| `Infra/` | Extensões de configuração de DI/pipeline (`ConfiguracaoExtensions`) e `BancoDeDadosHealthCheck` |
 
 ---
 

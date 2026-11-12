@@ -1,0 +1,29 @@
+# PostgreSQL para DESENVOLVIMENTO local.
+# Uso (na raiz do projeto):
+#   docker compose -f infra/docker/docker-compose.dev.yml up -d
+#
+# As credenciais batem com a connection string do appsettings.Development.json.
+# O docker-compose de produção (API + PostgreSQL + Nginx) será criado na Sprint 4.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: monitor-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: monitor
+      POSTGRES_USER: monitor
+      POSTGRES_PASSWORD: monitor
+    ports:
+      - "5432:5432"
+    volumes:
+      - monitor-pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monitor -d monitor"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  monitor-pgdata-dev:
+
