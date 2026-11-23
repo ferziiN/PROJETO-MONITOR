@@ -1,0 +1,79 @@
+# =============================================================================
+# Docker Compose de Produção / Homologação — Projeto Monitor
+# Sobe PostgreSQL + API ASP.NET Core + Nginx (Front-end + Proxy Reverso)
+#
+# Como executar (a partir da raiz do projeto):
+#   docker compose -f infra/docker/docker-compose.yml up -d --build
+# =============================================================================
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: monitor-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-monitor}
+      POSTGRES_USER: ${POSTGRES_USER:-monitor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-monitor}
+    volumes:
+      - monitor-pgdata:/var/lib/postgresql/data
+    networks:
+      - monitor-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-monitor} -d ${POSTGRES_DB:-monitor}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+    container_name: monitor-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      BancoDeDados__Provedor: PostgreSQL
+      BancoDeDados__AplicarMigrationsAoIniciar: "true"
+      ConnectionStrings__MonitorDb: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-monitor};Username=${POSTGRES_USER:-monitor};Password=${POSTGRES_PASSWORD:-monitor}"
+      Monitoramento__Habilitado: "true"
+      Monitoramento__IntervaloVarreduraSegundos: "5"
+      Monitoramento__TimeoutSegundos: "5"
+      Monitoramento__LimiteAtencaoMs: "1000"
+    networks:
+      - monitor-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: monitor-nginx
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${MONITOR_HTTP_PORT:-80}:80"
+    volumes:
+      - ../nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../../src/frontend:/usr/share/nginx/html:ro
+    networks:
+      - monitor-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  monitor-pgdata:
+
+networks:
+  monitor-net:
+    driver: bridge

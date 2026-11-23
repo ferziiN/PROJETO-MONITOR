@@ -2,6 +2,11 @@
 **/bin/
 **/obj/
 
+# Bancos SQLite locais de desenvolvimento
+*.db
+*.db-shm
+*.db-wal
+
 # Arquivos temporários e resultados de execução de testes.
 **/TestResults/
 *.coverage

@@ -1,3 +1,4 @@
+using Monitor.API.DTOs.Alertas;
 using Monitor.API.DTOs.Servicos;
 
 namespace Monitor.API.DTOs.Dashboard;
@@ -13,7 +14,8 @@ public record DashboardResponse(
     int Offline,
     int Atencao,
     int Desconhecido,
+    int AlertasAtivos,
     double? TempoMedioRespostaMs,
     DateTime GeradoEm,
-    IReadOnlyList<ServicoResponse> Servicos);
-
+    IReadOnlyList<ServicoResponse> Servicos,
+    IReadOnlyList<AlertaResponse> AlertasRecentes);

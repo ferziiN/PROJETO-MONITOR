@@ -1,3 +1,4 @@
+using Monitor.API.DTOs.Alertas;
 using Monitor.API.DTOs.Servicos;
 using Monitor.API.DTOs.Verificacoes;
 using Monitor.API.Models;
@@ -35,6 +36,19 @@ public static class MapeamentoExtensions
         v.VerificadoEm,
         v.MensagemErro);
 
+    public static AlertaResponse ParaResponse(this Alerta a) => new(
+        a.Id,
+        a.ServicoId,
+        a.Servico?.Nome ?? $"Serviço #{a.ServicoId}",
+        a.Servico?.ObterUrl().ToString() ?? string.Empty,
+        a.Tipo,
+        a.StatusAnterior,
+        a.StatusNovo,
+        a.Mensagem,
+        a.Reconhecido,
+        a.CriadoEm,
+        a.ResolvidoEm);
+
     public static Servico ParaEntidade(this CriarServicoRequest r)
     {
         var servico = new Servico();
@@ -56,4 +70,3 @@ public static class MapeamentoExtensions
         s.Ativo = r.Ativo;
     }
 }
-

@@ -12,11 +12,11 @@
 | Documentação de escopo | ✅ Concluída |
 | Estrutura de pastas | ✅ Criada |
 | Repositório Git / GitHub | ✅ Configurado |
-| Código back-end | ✅ Concluído (Sprints 1 e 2 — CRUD + Motor de Monitoramento) |
-| Código front-end | ✅ Base inicial criada (Sprint 3 — Dashboard, Cadastro e Detalhes) |
-| Infraestrutura (Docker/Nginx) | 🔄 Parcial (`docker-compose.dev.yml` para PostgreSQL local) |
+| Código back-end | ✅ Concluído (Sprints 1, 2 e 5 — CRUD, Monitoramento, Métricas e Alertas) |
+| Código front-end | ✅ Concluído (Sprints 3 e 5 — Dashboard, Filtros, Alertas e Gráficos) |
+| Infraestrutura (Docker/Nginx) | ✅ Configurada (Sprint 4 — `Dockerfile`, `docker-compose.yml`, `nginx.conf` e `deploy.sh`) |
 
-> As Fases 1, 2, 3 e a base da Fase 4 estão implementadas. O próximo passo é validar com o PostgreSQL ativo e avançar para a containerização completa (Sprint 4).
+> As Fases 1 a 5 do roadmap estão implementadas e prontas para execução local (SQLite/PostgreSQL) ou via Docker Compose.
 
 ---
 
@@ -47,8 +47,8 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 - [✅] Validar que o projeto compila e roda (`dotnet run`)
 
 #### 1.2 — Configurar o banco de dados
-- [ ] Instalar o PostgreSQL localmente (ou subir `infra/docker/docker-compose.dev.yml`)
-- [✅] Adicionar pacotes NuGet: `Npgsql.EntityFrameworkCore.PostgreSQL`, `Microsoft.EntityFrameworkCore.Design`
+- [✅] Configurar suporte híbrido a banco de dados (SQLite local out-of-the-box em dev + PostgreSQL via `infra/docker/docker-compose.dev.yml` ou produção)
+- [✅] Adicionar pacotes NuGet: `Npgsql.EntityFrameworkCore.PostgreSQL`, `Microsoft.EntityFrameworkCore.Sqlite`, `Microsoft.EntityFrameworkCore.Design`
 - [✅] Criar a connection string no `appsettings.Development.json`
 - [✅] Criar o `MonitorDbContext` em `Data/`
 
@@ -73,8 +73,8 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 - [✅] Criar as configurações Fluent API em `Data/Configurations/`
 
 #### 1.4 — Criar Migrations e aplicar
-- [✅] Gerar migration inicial (`dotnet ef migrations add InitialCreate`)
-- [ ] Aplicar migration (`dotnet ef database update` ou automática ao iniciar a API com PostgreSQL ativo)
+- [✅] Gerar migrations (`InitialCreate` e `AddAlertas`)
+- [✅] Aplicar esquema automaticamente ao iniciar a API (`EnsureCreatedAsync` para SQLite / `MigrateAsync` para PostgreSQL)
 
 #### 1.5 — Criar DTOs
 - [✅] `CriarServicoRequest`
@@ -140,32 +140,36 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 
 **Depende de:** Sprint 2 concluída (API com dados reais)
 
-#### 3.1 — Estrutura base do front-end
-- [✅] Criar `index.html` na raiz de `src/frontend/` ou em `pages/`
-- [✅] Criar os arquivos CSS base em `css/` (reset, variáveis, layout)
-- [✅] Criar o arquivo JS principal em `js/` (módulo de comunicação com a API)
+#### 3.1 — Estrutura base do front-end e Layout Centralizado
+- [✅] Criar `index.html` na raiz de `src/frontend/` (redirecionamento inteligente por sessão)
+- [✅] Criar os arquivos CSS base em `css/` (reset, variáveis, layout com Sidebar, login e responsividade)
+- [✅] Criar os módulos JS principais em `js/` (`api.js`, `auth.js`, `layout.js`, `config.js`, `utils.js`)
+- [✅] Implementar **Abas Laterais (Sidebar)** responsiva para separar e centralizar a navegação entre as telas
 
-#### 3.2 — Página do Dashboard
-- [✅] Exibir contadores de resumo (total, online, offline)
-- [✅] Listar serviços monitorados em uma tabela/cards com:
-  - Nome do serviço
-  - Status (com indicador visual colorido 🟢🔴🟡)
-  - Tempo de resposta
-  - Última verificação
+#### 3.2 — Home Responsiva & Página do Dashboard
+- [✅] Criar Hero Banner moderno com saudação do usuário autenticado, badge de perfil (`ADMIN` / `USUÁRIO`) e estado geral
+- [✅] Criar grade de **Atalhos Rápidos** (Cadastrar Serviço, Varredura Imediata, Central de Alertas e Frota Monitorada)
+- [✅] Exibir contadores de resumo (total, online, offline, atenção, latência média e alertas ativos)
+- [✅] Listar serviços monitorados em tabela com busca, filtro por status e indicadores coloridos (🟢🔴🟡)
 - [✅] Atualização automática dos dados (polling a cada X segundos)
 
-#### 3.3 — Página de cadastro de serviços
-- [✅] Formulário para criar novo serviço
+#### 3.3 — Autenticação e Controle de Acesso por Perfil (ADMIN vs USUÁRIO)
+- [✅] Criar tela de **Login** estilizada (`pages/login.html` + `js/login.js`) no padrão visual dark da plataforma
+- [✅] Criar endpoint de autenticação (`POST /api/auth/login`) e tabela `usuarios` com perfis `Admin` e `Usuario`
+- [✅] Garantir que o **Login ADMIN** tenha acesso irrestrito a todas as telas e ações
+- [✅] Estruturar matriz de permissões configurável (`PERMISSOES_POR_PERFIL` em `js/auth.js`) para o **Login USUÁRIO**, permitindo decidir e ajustar os acessos autorizados posteriormente
+
+#### 3.4 — Página de cadastro de serviços (Restrita ao perfil ADMIN)
+- [✅] Formulário para criar/editar serviço com prévia de URL em tempo real
 - [✅] Validação básica dos campos
 - [✅] Feedback visual de sucesso/erro
 
-#### 3.4 — Página de detalhes do serviço
+#### 3.5 — Página de detalhes do serviço
 - [✅] Exibir informações completas do serviço
-- [✅] Listar histórico recente de verificações
-- [✅] Botão para ativar/desativar monitoramento
-- [✅] Botão para editar/excluir
+- [✅] Listar histórico recente de verificações e gráficos de latência/uptime
+- [✅] Botões administrativos (ativar/desativar, editar, excluir) controlados pelo perfil do usuário
 
-#### 3.5 — Configurar CORS na API
+#### 3.6 — Configurar CORS na API
 - [✅] Habilitar CORS no back-end para permitir chamadas do front-end
 - [✅] Servir arquivos estáticos (se necessário durante dev)
 
@@ -183,19 +187,19 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 **Depende de:** Sprint 3 concluída (aplicação funcional de ponta a ponta)
 
 #### 4.1 — Dockerizar a aplicação
-- [ ] Criar `Dockerfile` para a API .NET em `infra/docker/`
-- [ ] Criar `docker-compose.yml` com:
+- [✅] Criar `Dockerfile` para a API .NET em `infra/docker/`
+- [✅] Criar `docker-compose.yml` com:
   - Container da API
   - Container do PostgreSQL
   - Volumes para persistência do banco
   - Rede interna entre containers
-- [ ] Validar que `docker-compose up` sobe tudo corretamente
+- [ ] Validar que `docker-compose up` sobe tudo corretamente no servidor alvo
 
 #### 4.2 — Configurar Nginx
-- [ ] Criar configuração do Nginx em `infra/nginx/`
-- [ ] Configurar como proxy reverso para a API
-- [ ] Servir os arquivos estáticos do front-end via Nginx
-- [ ] Adicionar Nginx ao `docker-compose.yml`
+- [✅] Criar configuração do Nginx em `infra/nginx/nginx.conf`
+- [✅] Configurar como proxy reverso para a API
+- [✅] Servir os arquivos estáticos do front-end via Nginx
+- [✅] Adicionar Nginx ao `docker-compose.yml`
 
 #### 4.3 — Preparar servidor Linux
 - [ ] Provisionar servidor (VPS, máquina virtual, etc.)
@@ -204,7 +208,7 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 - [ ] Configurar acesso SSH
 
 #### 4.4 — Deploy
-- [ ] Criar script de deploy em `infra/scripts/`
+- [✅] Criar script de deploy em `infra/scripts/deploy.sh`
 - [ ] Realizar o primeiro deploy no servidor
 - [ ] Validar a aplicação acessível via browser
 - [ ] Documentar o processo de deploy
@@ -223,22 +227,22 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 **Depende de:** Sprint 4 concluída (aplicação em produção)
 
 #### 5.1 — Histórico e métricas
-- [ ] Implementar cálculo de disponibilidade (% uptime)
-- [ ] Implementar cálculo de tempo médio de resposta
-- [ ] Identificar e registrar períodos de indisponibilidade
-- [ ] Criar endpoints para consulta de métricas
+- [✅] Implementar cálculo de disponibilidade (% uptime)
+- [✅] Implementar cálculo de tempo médio de resposta
+- [✅] Identificar e registrar períodos de indisponibilidade
+- [✅] Criar endpoints para consulta de métricas
   - `GET /api/servicos/{id}/metricas?periodo=24h`
 
 #### 5.2 — Gráficos no dashboard
-- [ ] Adicionar gráfico de disponibilidade ao longo do tempo
-- [ ] Adicionar gráfico de tempo de resposta
-- [ ] Usar uma lib JS leve (Chart.js ou similar)
+- [✅] Adicionar barra visual de disponibilidade ao longo do tempo
+- [✅] Adicionar gráfico SVG interativo de tempo de resposta
+- [✅] Seletor de período (`1h`, `24h`, `7d`, `30d`) na tela de detalhes
 
 #### 5.3 — Sistema de alertas
-- [ ] Detectar quando serviço muda de Online → Offline
-- [ ] Criar registro de alerta no banco
-- [ ] Exibir alertas no dashboard (badge, notificação visual)
-- [ ] Definir regras configuráveis (ex: alertar após N falhas consecutivas)
+- [✅] Detectar quando serviço muda para `Offline` ou `Atencao` (e resolver automaticamente ao voltar para `Online`)
+- [✅] Criar registro de alerta no banco (`Alerta` + `AlertasController`)
+- [✅] Exibir alertas no dashboard (card contador + lista de alertas com botão de reconhecimento)
+- [✅] Definir regras configuráveis de timeout e limite de atenção (`MonitoramentoOptions`)
 
 #### 5.4 — Notificações (opcional/futuro)
 - [ ] Avaliar integração com e-mail ou webhook
@@ -253,15 +257,15 @@ A ideia central é: **construir de dentro pra fora**. Primeiro o coração do si
 
 Estas funcionalidades **não são prioridade agora**, mas devem ser consideradas para versões futuras:
 
-| Funcionalidade | Prioridade | Complexidade |
-|---|---|---|
-| Autenticação e login | 🔴 Alta | Média |
-| Agente de monitoramento (CPU, RAM, disco) | 🟡 Média | Alta |
-| Monitoramento de containers Docker | 🟡 Média | Média |
-| CI/CD (deploy automatizado) | 🟡 Média | Média |
-| Controle de usuários e permissões | 🟢 Baixa | Média |
-| Centralização de logs | 🟢 Baixa | Alta |
-| Monitoramento de múltiplos ambientes | 🟢 Baixa | Alta |
+| Funcionalidade | Prioridade | Complexidade | Status |
+|---|---|---|---|
+| Autenticação, Login e Perfis (`ADMIN` / `USUÁRIO`) | 🔴 Alta | Média | ✅ Implementado (permissões finas do `USUÁRIO` configuráveis) |
+| Agente de monitoramento (CPU, RAM, disco) | 🟡 Média | Alta | 📋 Analisado em `ANALISE-MONITORAMENTO-COMPLETO.md` |
+| Monitoramento de containers Docker | 🟡 Média | Média | ⏳ Futuro |
+| CI/CD (deploy automatizado) | 🟡 Média | Média | ⏳ Futuro |
+| Refinamento de permissões do perfil `USUÁRIO` | 🟡 Média | Baixa | 🔄 A definir pela equipe |
+| Centralização de logs | 🟢 Baixa | Alta | ⏳ Futuro |
+| Monitoramento de múltiplos ambientes | 🟢 Baixa | Alta | ⏳ Futuro |
 
 ---
 

@@ -12,7 +12,7 @@ public interface IDashboardService
 }
 
 /// <summary>
-/// Monta a visão geral do dashboard (RF04).
+/// Monta a visão geral do dashboard (RF04) incluindo alertas recentes (Sprint 5).
 /// </summary>
 public class DashboardService(MonitorDbContext db) : IDashboardService
 {
@@ -20,6 +20,16 @@ public class DashboardService(MonitorDbContext db) : IDashboardService
     {
         var servicos = await db.Servicos.AsNoTracking()
             .OrderBy(s => s.Nome)
+            .ToListAsync(ct);
+
+        var alertasAtivos = await db.Alertas.AsNoTracking()
+            .CountAsync(a => !a.Reconhecido, ct);
+
+        var alertasRecentes = await db.Alertas.AsNoTracking()
+            .Include(a => a.Servico)
+            .OrderBy(a => a.Reconhecido)
+            .ThenByDescending(a => a.CriadoEm)
+            .Take(10)
             .ToListAsync(ct);
 
         // Contadores de status consideram apenas os serviços com monitoramento ativo.
@@ -38,8 +48,10 @@ public class DashboardService(MonitorDbContext db) : IDashboardService
             Offline: ativos.Count(s => s.StatusAtual == StatusServico.Offline),
             Atencao: ativos.Count(s => s.StatusAtual == StatusServico.Atencao),
             Desconhecido: ativos.Count(s => s.StatusAtual == StatusServico.Desconhecido),
+            AlertasAtivos: alertasAtivos,
             TempoMedioRespostaMs: temposOnline.Count == 0 ? null : Math.Round(temposOnline.Average(), 1),
             GeradoEm: DateTime.UtcNow,
-            Servicos: servicos.Select(s => s.ParaResponse()).ToList());
+            Servicos: servicos.Select(s => s.ParaResponse()).ToList(),
+            AlertasRecentes: alertasRecentes.Select(a => a.ParaResponse()).ToList());
     }
 }

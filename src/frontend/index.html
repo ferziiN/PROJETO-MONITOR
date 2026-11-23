@@ -2,11 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=pages/dashboard.html">
   <title>Monitor</title>
+  <script type="module">
+    const sessao = localStorage.getItem("monitor.sessao");
+    window.location.replace(sessao ? "pages/dashboard.html" : "pages/login.html");
+  </script>
 </head>
 <body>
-  <p>Redirecionando para o <a href="pages/dashboard.html">dashboard</a>…</p>
+  <p>Redirecionando para o <a href="pages/login.html">Monitor</a>…</p>
 </body>
 </html>
-

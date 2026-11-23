@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar · Monitor</title>
+  <link rel="stylesheet" href="../css/base.css?v=5">
+</head>
+<body class="pagina-login">
+  <div class="login-wrapper">
+    <div class="login-card card">
+      <div class="login-cabecalho">
+        <div class="marca-login">
+          <span class="pulso"></span>
+          <span>MONITOR</span>
+        </div>
+        <h1>Acesso à Plataforma</h1>
+        <p class="subtitulo">Central de observabilidade e disponibilidade de infraestrutura</p>
+      </div>
+
+      <div id="mensagem" class="alerta oculto"></div>
+
+      <div class="seletor-perfis-demo">
+        <div class="rotulo-seletor">Acesso rápido para avaliação de perfis:</div>
+        <div class="grade-perfis">
+          <button type="button" class="card-perfil-demo ativo" id="btn-demo-admin" data-login="admin" data-senha="admin123">
+            <div class="topo-perfil">
+              <span class="badge-perfil admin">ADMIN</span>
+              <span class="suave mono">admin</span>
+            </div>
+            <div class="desc-perfil">Acesso total: Dashboard, Cadastro, Edição, Exclusão e API.</div>
+          </button>
+
+          <button type="button" class="card-perfil-demo" id="btn-demo-usuario" data-login="usuario" data-senha="usuario123">
+            <div class="topo-perfil">
+              <span class="badge-perfil usuario">USUÁRIO</span>
+              <span class="suave mono">usuario</span>
+            </div>
+            <div class="desc-perfil">Acesso controlado: Monitoramento e consultas (acessos configuráveis).</div>
+          </button>
+        </div>
+      </div>
+
+      <form id="form-login" class="formulario-login" novalidate>
+        <div class="campo">
+          <label for="login">Usuário</label>
+          <input id="login" name="login" type="text" required autocomplete="username" placeholder="admin ou usuario" value="admin">
+        </div>
+
+        <div class="campo">
+          <label for="senha">Senha</label>
+          <input id="senha" name="senha" type="password" required autocomplete="current-password" placeholder="••••••••" value="admin123">
+        </div>
+
+        <button type="submit" class="botao primario largura-total btn-entrar" id="btn-entrar">
+          Entrar no Monitor →
+        </button>
+      </form>
+
+      <div class="login-rodape">
+        <span class="suave">Credenciais padrão:</span>
+        <span class="mono">admin / admin123</span> · <span class="mono">usuario / usuario123</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/login.js?v=4"></script>
+</body>
+</html>

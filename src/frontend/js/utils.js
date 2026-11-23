@@ -63,3 +63,33 @@ export function esconderMensagem(elemento) {
   elemento.className = "alerta oculto";
 }
 
+/**
+ * Reduz dinamicamente a fonte de valores/textos dentro dos cards de tamanho fixo
+ * quando o conteúdo for muito extenso para caber na largura do card.
+ */
+export function ajustarFonteCards() {
+  const seletores = [
+    { sel: ".card.resumo .valor", maxPx: 26, minPx: 11 },
+    { sel: ".card.resumo .rotulo", maxPx: 12, minPx: 8.5 },
+    { sel: ".card-atalho .atalho-titulo", maxPx: 14.5, minPx: 10 },
+    { sel: ".card-atalho .atalho-desc", maxPx: 12, minPx: 9 },
+    { sel: ".detalhes dd", maxPx: 14, minPx: 9.5 },
+    { sel: ".detalhes dt", maxPx: 12, minPx: 9 },
+  ];
+
+  seletores.forEach(({ sel, maxPx, minPx }) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      // Não sobrescreve quando contém badge HTML interno (ex.: badgeStatus)
+      if (el.querySelector(".status")) return;
+
+      el.style.fontSize = `${maxPx}px`;
+      let tamanho = maxPx;
+      while (el.scrollWidth > el.clientWidth && tamanho > minPx) {
+        tamanho -= 0.5;
+        el.style.fontSize = `${tamanho}px`;
+      }
+    });
+  });
+}
+
+window.addEventListener("resize", () => requestAnimationFrame(ajustarFonteCards));

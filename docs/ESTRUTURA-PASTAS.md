@@ -51,13 +51,13 @@ Projeto principal da API REST, desenvolvido em C# com ASP.NET Core, Entity Frame
 
 | Pasta | Descrição |
 |---|---|
-| `Controllers/` | Endpoints da API REST (`ServicosController`, `DashboardController`) |
-| `Models/` | Entidades de domínio (`Servico`, `Verificacao`, `Enums`) |
-| `DTOs/` | Data Transfer Objects — objetos de entrada/saída e extensões de mapeamento |
+| `Controllers/` | Endpoints da API REST (`ServicosController`, `DashboardController`, `AlertasController`, `AuthController`) |
+| `Models/` | Entidades de domínio (`Servico`, `Verificacao`, `Alerta`, `Usuario`, `Enums`) |
+| `DTOs/` | Data Transfer Objects — objetos de entrada/saída (`Servicos`, `Verificacoes`, `Alertas`, `Auth`, `Dashboard`) |
 | `Services/` | Regras de negócio (`ServicoService`, `DashboardService`) e motor em `Services/Monitoramento/` |
 | `Data/` | `MonitorDbContext` do Entity Framework Core |
-| `Data/Configurations/` | Mapeamentos Fluent API (`ServicoConfiguration`, `VerificacaoConfiguration`) |
-| `Migrations/` | Migrations geradas pelo Entity Framework Core (`InitialCreate`) |
+| `Data/Configurations/` | Mapeamentos Fluent API (`ServicoConfiguration`, `VerificacaoConfiguration`, `AlertaConfiguration`, `UsuarioConfiguration`) |
+| `Migrations/` | Migrations geradas pelo Entity Framework Core (`InitialCreate`, `AddAlertas`, `AddUsuarios`) |
 | `Infra/` | Extensões de configuração de DI/pipeline (`ConfiguracaoExtensions`) e `BancoDeDadosHealthCheck` |
 
 ---
@@ -81,9 +81,9 @@ Configurações para execução e disponibilização da aplicação em ambiente 
 
 | Pasta | Descrição |
 |---|---|
-| `docker/` | Dockerfile e docker-compose.yml para containerização da API e PostgreSQL |
-| `nginx/` | Configuração do Nginx como proxy reverso |
-| `scripts/` | Scripts auxiliares de deploy, inicialização e automação |
+| `docker/` | `Dockerfile` multi-stage da API, `docker-compose.yml` (produção/homologação) e `docker-compose.dev.yml` |
+| `nginx/` | `nginx.conf` — servidor de arquivos estáticos do front-end e proxy reverso para a API |
+| `scripts/` | `deploy.sh` — script automatizado de build, inicialização e verificação de saúde (`/health`) |
 
 ---
 

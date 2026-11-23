@@ -1,4 +1,4 @@
-import { CONFIG } from "./config.js";
+import { CONFIG } from "./config.js?v=4";
 
 /**
  * Erro lançado quando a API responde com status de erro.
@@ -37,6 +37,7 @@ async function requisitar(caminho, { metodo = "GET", corpo } = {}) {
 
 /** Cliente da API REST do Monitor. */
 export const api = {
+  login: (credenciais) => requisitar("/api/auth/login", { metodo: "POST", corpo: credenciais }),
   dashboard: () => requisitar("/api/dashboard"),
 
   listarServicos: () => requisitar("/api/servicos"),
@@ -51,5 +52,9 @@ export const api = {
   verificacoes: (id, limite = 50) => requisitar(`/api/servicos/${id}/verificacoes?limite=${limite}`),
   metricas: (id, periodo = "24h") => requisitar(`/api/servicos/${id}/metricas?periodo=${periodo}`),
   verificarAgora: (id) => requisitar(`/api/servicos/${id}/verificar`, { metodo: "POST" }),
-};
 
+  listarAlertas: (params = "") => requisitar(`/api/alertas${params}`),
+  reconhecerAlerta: (id) => requisitar(`/api/alertas/${id}/reconhecer`, { metodo: "PATCH" }),
+  reconhecerTodosAlertas: (servicoId) =>
+    requisitar(`/api/alertas/reconhecer-todos${servicoId ? `?servicoId=${servicoId}` : ""}`, { metodo: "POST" }),
+};

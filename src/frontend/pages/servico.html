@@ -4,79 +4,98 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhes do serviço · Monitor</title>
-  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/base.css?v=5">
 </head>
 <body>
-  <header class="topo">
-    <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
-    <nav class="menu">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="servico-form.html">Novo serviço</a>
-    </nav>
-  </header>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-app"></aside>
 
-  <main class="conteudo">
-    <div class="cabecalho-pagina">
-      <div>
-        <h1 id="nome">Carregando…</h1>
-        <p class="subtitulo mono" id="url"></p>
-      </div>
-      <div class="acoes">
-        <button class="botao" id="btn-verificar">⚡ Verificar agora</button>
-        <button class="botao" id="btn-ativo">Pausar</button>
-        <a class="botao" id="btn-editar" href="#">Editar</a>
-        <button class="botao perigo" id="btn-excluir">Excluir</button>
-      </div>
+    <div class="area-principal">
+      <header class="topbar-mobile">
+        <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
+        <button class="botao pequeno" id="btn-abrir-sidebar">☰ Menu</button>
+      </header>
+
+      <main class="conteudo">
+        <div class="cabecalho-pagina">
+          <div>
+            <h1 id="nome">Carregando…</h1>
+            <p class="subtitulo mono" id="url"></p>
+          </div>
+          <div class="acoes">
+            <button class="botao" id="btn-verificar">⚡ Verificar agora</button>
+            <button class="botao" id="btn-ativo">Pausar</button>
+            <a class="botao" id="btn-editar" href="#">Editar</a>
+            <button class="botao perigo" id="btn-excluir">Excluir</button>
+          </div>
+        </div>
+
+        <div id="mensagem" class="alerta oculto"></div>
+
+        <section class="grade-resumo">
+          <div class="card resumo">
+            <div class="rotulo">Status atual</div>
+            <div class="valor" id="status-atual" style="font-size:1.25rem">-</div>
+          </div>
+          <div class="card resumo">
+            <div class="rotulo">Última resposta</div>
+            <div class="valor" id="ultima-resposta">-</div>
+          </div>
+          <div class="card resumo online">
+            <div class="rotulo" id="rotulo-disponibilidade">Disponibilidade (24h)</div>
+            <div class="valor" id="disponibilidade">-</div>
+          </div>
+          <div class="card resumo">
+            <div class="rotulo" id="rotulo-tempo-medio">Resposta média (24h)</div>
+            <div class="valor" id="tempo-medio">-</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="cabecalho-card">
+            <div>
+              <h2>Tempo de resposta & disponibilidade recente</h2>
+              <p class="subtitulo" id="resumo-grafico">Últimas 40 verificações</p>
+            </div>
+            <div class="acoes" id="seletor-periodo">
+              <button class="botao pequeno" data-periodo="1h">1h</button>
+              <button class="botao pequeno ativo" data-periodo="24h">24h</button>
+              <button class="botao pequeno" data-periodo="7d">7d</button>
+              <button class="botao pequeno" data-periodo="30d">30d</button>
+            </div>
+          </div>
+          <div class="grafico-container" id="grafico-latencia"></div>
+          <div class="barra-uptime" id="barra-uptime" title="Histórico visual de status das últimas verificações"></div>
+        </section>
+
+        <section class="card">
+          <h2>Configuração</h2>
+          <dl class="detalhes" id="detalhes"></dl>
+        </section>
+
+        <section class="card">
+          <h2>Histórico recente de verificações</h2>
+          <div class="tabela-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data/hora</th>
+                  <th>Status</th>
+                  <th>Resposta</th>
+                  <th>HTTP</th>
+                  <th>Mensagem</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-historico">
+                <tr><td colspan="5" class="vazio">Carregando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
     </div>
+  </div>
 
-    <div id="mensagem" class="alerta oculto"></div>
-
-    <section class="grade-resumo">
-      <div class="card resumo">
-        <div class="rotulo">Status atual</div>
-        <div class="valor" id="status-atual" style="font-size:1.25rem">-</div>
-      </div>
-      <div class="card resumo">
-        <div class="rotulo">Última resposta</div>
-        <div class="valor" id="ultima-resposta">-</div>
-      </div>
-      <div class="card resumo online">
-        <div class="rotulo">Disponibilidade (24h)</div>
-        <div class="valor" id="disponibilidade">-</div>
-      </div>
-      <div class="card resumo">
-        <div class="rotulo">Resposta média (24h)</div>
-        <div class="valor" id="tempo-medio">-</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Configuração</h2>
-      <dl class="detalhes" id="detalhes"></dl>
-    </section>
-
-    <section class="card">
-      <h2>Histórico recente</h2>
-      <div class="tabela-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Data/hora</th>
-              <th>Status</th>
-              <th>Resposta</th>
-              <th>HTTP</th>
-              <th>Mensagem</th>
-            </tr>
-          </thead>
-          <tbody id="tabela-historico">
-            <tr><td colspan="5" class="vazio">Carregando…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <script type="module" src="../js/servico-detalhe.js"></script>
+  <script type="module" src="../js/servico-detalhe.js?v=4"></script>
 </body>
 </html>
-

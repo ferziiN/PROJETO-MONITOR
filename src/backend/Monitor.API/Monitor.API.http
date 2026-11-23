@@ -1,9 +1,9 @@
 @Monitor.API_HostAddress = http://localhost:5094
 
-### Health check da própria API (inclui conexão com o PostgreSQL)
+### Health check da própria API (inclui conexão com o banco configurado)
 GET {{Monitor.API_HostAddress}}/health
 
-### Dashboard — resumo geral
+### Dashboard — resumo geral + alertas ativos
 GET {{Monitor.API_HostAddress}}/api/dashboard
 Accept: application/json
 
@@ -72,5 +72,15 @@ POST {{Monitor.API_HostAddress}}/api/servicos/1/verificar
 ### Métricas (30m, 1h, 24h, 7d...)
 GET {{Monitor.API_HostAddress}}/api/servicos/1/metricas?periodo=24h
 
-### Remover
+### Listar alertas (filtros opcionais: ?apenasNaoReconhecidos=true&servicoId=1)
+GET {{Monitor.API_HostAddress}}/api/alertas
+Accept: application/json
+
+### Reconhecer um alerta
+PATCH {{Monitor.API_HostAddress}}/api/alertas/1/reconhecer
+
+### Reconhecer todos os alertas pendentes
+POST {{Monitor.API_HostAddress}}/api/alertas/reconhecer-todos
+
+### Remover serviço
 DELETE {{Monitor.API_HostAddress}}/api/servicos/1

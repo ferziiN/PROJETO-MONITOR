@@ -9,8 +9,8 @@ namespace Monitor.API.Services.Monitoramento;
 public interface IMonitoramentoService
 {
     /// <summary>
-    /// Verifica um serviço, grava o resultado no histórico e atualiza o status atual.
-    /// Retorna null se o serviço não existir.
+    /// Verifica um serviço, grava o resultado no histórico, processa alertas de transição
+    /// e atualiza o status atual. Retorna null se o serviço não existir.
     /// </summary>
     Task<VerificacaoResponse?> VerificarAsync(int servicoId, CancellationToken ct = default);
 }
@@ -39,12 +39,14 @@ public class MonitoramentoService(
             VerificadoEm = agora
         };
 
-        if (servico.StatusAtual != resultado.Status)
+        var statusAnterior = servico.StatusAtual;
+        if (statusAnterior != resultado.Status)
         {
-            // Ponto de extensão para a futura Fase 7 (Alertas): mudança de estado.
             logger.LogInformation(
                 "Serviço {Nome} ({Url}) mudou de {Anterior} para {Atual}",
-                servico.Nome, url, servico.StatusAtual, resultado.Status);
+                servico.Nome, url, statusAnterior, resultado.Status);
+
+            await RegistrarAlertaTransicaoAsync(servico, statusAnterior, resultado, agora, ct);
         }
 
         servico.StatusAtual = resultado.Status;
@@ -57,5 +59,69 @@ public class MonitoramentoService(
 
         return verificacao.ParaResponse();
     }
-}
 
+    private async Task RegistrarAlertaTransicaoAsync(
+        Servico servico,
+        StatusServico statusAnterior,
+        ResultadoVerificacao resultado,
+        DateTime agora,
+        CancellationToken ct)
+    {
+        if (resultado.Status == StatusServico.Offline)
+        {
+            var detalhe = string.IsNullOrWhiteSpace(resultado.MensagemErro)
+                ? "Serviço indisponível."
+                : resultado.MensagemErro;
+
+            db.Alertas.Add(new Alerta
+            {
+                ServicoId = servico.Id,
+                Tipo = TipoAlerta.Indisponibilidade,
+                StatusAnterior = statusAnterior,
+                StatusNovo = StatusServico.Offline,
+                Mensagem = $"[{servico.Nome}] Ficou OFFLINE — {detalhe}",
+                Reconhecido = false,
+                CriadoEm = agora
+            });
+        }
+        else if (resultado.Status == StatusServico.Atencao)
+        {
+            db.Alertas.Add(new Alerta
+            {
+                ServicoId = servico.Id,
+                Tipo = TipoAlerta.Lentidao,
+                StatusAnterior = statusAnterior,
+                StatusNovo = StatusServico.Atencao,
+                Mensagem = $"[{servico.Nome}] Em ATENÇÃO — Resposta elevada ({resultado.TempoRespostaMs} ms).",
+                Reconhecido = false,
+                CriadoEm = agora
+            });
+        }
+        else if (resultado.Status == StatusServico.Online
+                 && (statusAnterior is StatusServico.Offline or StatusServico.Atencao))
+        {
+            // Resolve automaticamente alertas pendentes deste serviço
+            var pendentes = await db.Alertas
+                .Where(a => a.ServicoId == servico.Id && a.ResolvidoEm == null)
+                .ToListAsync(ct);
+
+            foreach (var pendente in pendentes)
+            {
+                pendente.ResolvidoEm = agora;
+                pendente.Reconhecido = true;
+            }
+
+            db.Alertas.Add(new Alerta
+            {
+                ServicoId = servico.Id,
+                Tipo = TipoAlerta.Recuperacao,
+                StatusAnterior = statusAnterior,
+                StatusNovo = StatusServico.Online,
+                Mensagem = $"[{servico.Nome}] Recuperado — Voltou a responder ({resultado.TempoRespostaMs} ms).",
+                Reconhecido = true,
+                CriadoEm = agora,
+                ResolvidoEm = agora
+            });
+        }
+    }
+}

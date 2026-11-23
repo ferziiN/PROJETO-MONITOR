@@ -1,0 +1,5 @@
+{
+  "omnisharp.useModernNet": true,
+  "omnisharp.defaultLaunchSolution": "ProjetoMonitor.sln",
+  "dotnet.defaultSolution": "ProjetoMonitor.sln"
+}

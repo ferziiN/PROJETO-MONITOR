@@ -1,5 +1,8 @@
-import { api } from "./api.js";
-import { esconderMensagem, mostrarMensagem, obterParametroUrl } from "./utils.js";
+import { api } from "./api.js?v=4";
+import { inicializarLayout } from "./layout.js?v=4";
+import { esconderMensagem, mostrarMensagem, obterParametroUrl } from "./utils.js?v=4";
+
+inicializarLayout({ telaAtiva: "servico-form" });
 
 /** Cadastro (sem ?id) e edição (com ?id=123) de serviços. */
 const id = obterParametroUrl("id");

@@ -2,7 +2,9 @@ using System.Net;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Monitor.API.Controllers;
 using Monitor.API.Data;
+using Monitor.API.Models;
 using Monitor.API.Services.Monitoramento;
 
 namespace Monitor.API.Infra;
@@ -20,24 +22,36 @@ public static class ConfiguracaoExtensions
             .AddControllers()
             .AddJsonOptions(o =>
             {
-                // Enums trafegam como texto: "Online", "Https"...
+                // Enums trafegam como texto: "Online", "Https", "Admin"...
                 o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
         services.AddOpenApi();
         services.AddProblemDetails();
-        services.AddHealthChecks().AddCheck<BancoDeDadosHealthCheck>("postgresql");
+        services.AddHealthChecks().AddCheck<BancoDeDadosHealthCheck>("database");
 
         return services;
     }
 
     public static IServiceCollection AdicionarBancoDeDados(this IServiceCollection services, IConfiguration config)
     {
+        var provedor = config["BancoDeDados:Provedor"] ?? "PostgreSQL";
         var connectionString = config.GetConnectionString("MonitorDb")
             ?? throw new InvalidOperationException(
                 "Connection string 'MonitorDb' não configurada (appsettings ou variável ConnectionStrings__MonitorDb).");
 
-        services.AddDbContext<MonitorDbContext>(o => o.UseNpgsql(connectionString));
+        services.AddDbContext<MonitorDbContext>(o =>
+        {
+            if (string.Equals(provedor, "Sqlite", StringComparison.OrdinalIgnoreCase))
+            {
+                o.UseSqlite(connectionString);
+            }
+            else
+            {
+                o.UseNpgsql(connectionString);
+            }
+        });
+
         return services;
     }
 
@@ -86,7 +100,8 @@ public static class ConfiguracaoExtensions
     }
 
     /// <summary>
-    /// Aplica as migrations pendentes ao iniciar (controlado por BancoDeDados:AplicarMigrationsAoIniciar).
+    /// Inicializa o esquema do banco ao iniciar (MigrateAsync para PostgreSQL, EnsureCreatedAsync para SQLite)
+    /// e popula usuários padrão (admin / usuario) e serviços de demonstração.
     /// </summary>
     public static async Task AplicarMigrationsAsync(this WebApplication app)
     {
@@ -96,13 +111,102 @@ public static class ConfiguracaoExtensions
         {
             await using var scope = app.Services.CreateAsyncScope();
             var db = scope.ServiceProvider.GetRequiredService<MonitorDbContext>();
-            await db.Database.MigrateAsync();
-            app.Logger.LogInformation("Migrations aplicadas com sucesso.");
+            var provedor = app.Configuration["BancoDeDados:Provedor"] ?? "PostgreSQL";
+
+            if (string.Equals(provedor, "Sqlite", StringComparison.OrdinalIgnoreCase))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                // Caso o arquivo SQLite seja de uma versão anterior do esquema (sem tabela usuarios), recria em dev.
+                try
+                {
+                    _ = await db.Usuarios.AnyAsync();
+                }
+                catch
+                {
+                    await db.Database.EnsureDeletedAsync();
+                    await db.Database.EnsureCreatedAsync();
+                }
+
+                app.Logger.LogInformation("Banco local SQLite inicializado com sucesso.");
+            }
+            else
+            {
+                await db.Database.MigrateAsync();
+                app.Logger.LogInformation("Migrations PostgreSQL aplicadas com sucesso.");
+            }
+
+            if (!await db.Usuarios.AnyAsync())
+            {
+                db.Usuarios.AddRange(
+                    new Usuario
+                    {
+                        Nome = "Carlos Eduardo (Admin TI)",
+                        Login = "admin",
+                        SenhaHash = AuthController.GerarHashSimples("admin123"),
+                        Perfil = PerfilUsuario.Admin,
+                        Ativo = true
+                    },
+                    new Usuario
+                    {
+                        Nome = "Operador NOC (Usuário)",
+                        Login = "usuario",
+                        SenhaHash = AuthController.GerarHashSimples("usuario123"),
+                        Perfil = PerfilUsuario.Usuario,
+                        Ativo = true
+                    });
+
+                await db.SaveChangesAsync();
+                app.Logger.LogInformation("Perfis padrão 'admin' e 'usuario' criados.");
+            }
+
+            if (app.Configuration.GetValue<bool>("BancoDeDados:PopularDadosIniciais")
+                && !await db.Servicos.AnyAsync())
+            {
+                var agora = DateTime.UtcNow;
+                db.Servicos.AddRange(
+                    new Servico
+                    {
+                        Nome = "Monitor API (Self Health)",
+                        Endereco = "localhost",
+                        Porta = 5094,
+                        Endpoint = "/health",
+                        Tipo = TipoProtocolo.Http,
+                        IntervaloSegundos = 30,
+                        Ativo = true,
+                        ProximaVerificacaoEm = agora
+                    },
+                    new Servico
+                    {
+                        Nome = "Google DNS Web",
+                        Endereco = "dns.google",
+                        Porta = 443,
+                        Endpoint = "/",
+                        Tipo = TipoProtocolo.Https,
+                        IntervaloSegundos = 60,
+                        Ativo = true,
+                        ProximaVerificacaoEm = agora
+                    },
+                    new Servico
+                    {
+                        Nome = "Servidor Legado (Simulação Offline)",
+                        Endereco = "localhost",
+                        Porta = 59999,
+                        Endpoint = "/status",
+                        Tipo = TipoProtocolo.Http,
+                        IntervaloSegundos = 45,
+                        Ativo = true,
+                        ProximaVerificacaoEm = agora
+                    });
+
+                await db.SaveChangesAsync();
+                app.Logger.LogInformation("Serviços iniciais de demonstração cadastrados.");
+            }
         }
         catch (Exception ex)
         {
             // Não derruba a API: o /health vai indicar o problema com o banco.
-            app.Logger.LogError(ex, "Não foi possível aplicar as migrations. Verifique se o PostgreSQL está no ar.");
+            app.Logger.LogError(ex, "Não foi possível inicializar o banco de dados.");
         }
     }
 
@@ -125,9 +229,18 @@ public static class ConfiguracaoExtensions
 
         var arquivos = new PhysicalFileProvider(caminho);
         app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = arquivos });
-        app.UseStaticFiles(new StaticFileOptions { FileProvider = arquivos });
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = arquivos,
+            OnPrepareResponse = ctx =>
+            {
+                // Evita cache de arquivos JS/CSS/HTML no navegador durante o desenvolvimento
+                ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+                ctx.Context.Response.Headers.Pragma = "no-cache";
+                ctx.Context.Response.Headers.Expires = "0";
+            }
+        });
 
         app.Logger.LogInformation("Front-end servido a partir de {Caminho}", caminho);
     }
 }
-

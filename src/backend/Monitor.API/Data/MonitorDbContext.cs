@@ -4,12 +4,14 @@ using Monitor.API.Models;
 namespace Monitor.API.Data;
 
 /// <summary>
-/// Contexto do Entity Framework Core com o PostgreSQL.
+/// Contexto do Entity Framework Core (PostgreSQL em produção / SQLite opcional em dev).
 /// </summary>
 public class MonitorDbContext(DbContextOptions<MonitorDbContext> options) : DbContext(options)
 {
     public DbSet<Servico> Servicos => Set<Servico>();
     public DbSet<Verificacao> Verificacoes => Set<Verificacao>();
+    public DbSet<Alerta> Alertas => Set<Alerta>();
+    public DbSet<Usuario> Usuarios => Set<Usuario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,4 +46,3 @@ public class MonitorDbContext(DbContextOptions<MonitorDbContext> options) : DbCo
         }
     }
 }
-

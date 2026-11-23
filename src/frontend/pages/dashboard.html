@@ -3,78 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard · Monitor</title>
-  <link rel="stylesheet" href="../css/base.css">
+  <title>Home · Dashboard · Monitor</title>
+  <link rel="stylesheet" href="../css/base.css?v=5">
 </head>
 <body>
-  <header class="topo">
-    <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
-    <nav class="menu">
-      <a href="dashboard.html" class="ativo">Dashboard</a>
-      <a href="servico-form.html">Novo serviço</a>
-    </nav>
-  </header>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-app"></aside>
 
-  <main class="conteudo">
-    <div class="cabecalho-pagina">
-      <div>
-        <h1>Visão geral</h1>
-        <p class="subtitulo" id="ultima-atualizacao">Carregando…</p>
-      </div>
-      <div class="acoes">
-        <button class="botao" id="btn-atualizar">↻ Atualizar</button>
-        <a class="botao primario" href="servico-form.html">+ Novo serviço</a>
-      </div>
+    <div class="area-principal">
+      <header class="topbar-mobile">
+        <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
+        <button class="botao pequeno" id="btn-abrir-sidebar">☰ Menu</button>
+      </header>
+
+      <main class="conteudo">
+        <!-- Hero Banner da Home -->
+        <section class="hero-home">
+          <div>
+            <div class="hero-saudacao">
+              <h1 id="saudacao-usuario">Painel de Controle</h1>
+              <span class="badge-perfil admin" id="badge-perfil-topo">ADMIN</span>
+            </div>
+            <p class="subtitulo" id="ultima-atualizacao">Carregando estado da infraestrutura…</p>
+          </div>
+          <div class="acoes">
+            <button class="botao" id="btn-atualizar">↻ Atualizar agora</button>
+            <a class="botao primario" id="btn-novo-servico-topo" href="servico-form.html">+ Novo serviço</a>
+          </div>
+        </section>
+
+        <div id="mensagem" class="alerta oculto"></div>
+
+        <!-- Atalhos Rápidos da Home -->
+        <section class="grade-atalhos">
+          <a class="card-atalho" id="atalho-cadastrar" href="servico-form.html">
+            <div class="atalho-icone">➕</div>
+            <div>
+              <div class="atalho-titulo">Cadastrar Serviço</div>
+              <div class="atalho-desc">Adicionar novo host HTTP/HTTPS</div>
+            </div>
+          </a>
+
+          <button type="button" class="card-atalho" id="atalho-verificar-todos">
+            <div class="atalho-icone">⚡</div>
+            <div>
+              <div class="atalho-titulo">Varredura Imediata</div>
+              <div class="atalho-desc">Checar todos os serviços ativos</div>
+            </div>
+          </button>
+
+          <a class="card-atalho" href="#secao-alertas">
+            <div class="atalho-icone">🔔</div>
+            <div>
+              <div class="atalho-titulo">Central de Alertas</div>
+              <div class="atalho-desc">Acompanhar quedas e recuperações</div>
+            </div>
+          </a>
+
+          <a class="card-atalho" href="#secao-servicos">
+            <div class="atalho-icone">🖥️</div>
+            <div>
+              <div class="atalho-titulo">Frota Monitorada</div>
+              <div class="atalho-desc">Filtrar servidores por status</div>
+            </div>
+          </a>
+        </section>
+
+        <!-- Cards de Indicadores (KPIs) -->
+        <section class="grade-resumo">
+          <div class="card resumo total">
+            <div class="rotulo">Monitorados</div>
+            <div class="valor" id="total-ativos">-</div>
+          </div>
+          <div class="card resumo online">
+            <div class="rotulo">Online</div>
+            <div class="valor" id="total-online">-</div>
+          </div>
+          <div class="card resumo offline">
+            <div class="rotulo">Offline</div>
+            <div class="valor" id="total-offline">-</div>
+          </div>
+          <div class="card resumo atencao">
+            <div class="rotulo">Atenção</div>
+            <div class="valor" id="total-atencao">-</div>
+          </div>
+          <div class="card resumo">
+            <div class="rotulo">Resposta média</div>
+            <div class="valor" id="tempo-medio">-</div>
+          </div>
+          <div class="card resumo offline">
+            <div class="rotulo">Alertas ativos</div>
+            <div class="valor" id="total-alertas">-</div>
+          </div>
+        </section>
+
+        <!-- Central de Alertas -->
+        <section class="card oculto" id="secao-alertas">
+          <div class="cabecalho-card">
+            <h2>🔔 Central de Alertas Recentes</h2>
+            <button class="botao pequeno" id="btn-reconhecer-todos">✓ Reconhecer pendentes</button>
+          </div>
+          <div class="lista-alertas" id="lista-alertas"></div>
+        </section>
+
+        <!-- Lista de Serviços Monitorados -->
+        <section class="card" id="secao-servicos">
+          <div class="cabecalho-card">
+            <h2>🖥️ Serviços Monitorados</h2>
+            <div class="barra-filtros">
+              <input type="search" id="filtro-busca" placeholder="Buscar por nome ou URL…">
+              <select id="filtro-status">
+                <option value="">Todos os status</option>
+                <option value="Online">Online</option>
+                <option value="Offline">Offline</option>
+                <option value="Atencao">Atenção</option>
+                <option value="Desconhecido">Aguardando</option>
+                <option value="Pausado">Pausados</option>
+              </select>
+            </div>
+          </div>
+          <div class="tabela-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Serviço</th>
+                  <th>Status</th>
+                  <th>Resposta</th>
+                  <th>Última verificação</th>
+                  <th>Intervalo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tabela-servicos">
+                <tr><td colspan="6" class="vazio">Carregando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
     </div>
+  </div>
 
-    <div id="mensagem" class="alerta oculto"></div>
-
-    <section class="grade-resumo">
-      <div class="card resumo total">
-        <div class="rotulo">Monitorados</div>
-        <div class="valor" id="total-ativos">-</div>
-      </div>
-      <div class="card resumo online">
-        <div class="rotulo">Online</div>
-        <div class="valor" id="total-online">-</div>
-      </div>
-      <div class="card resumo offline">
-        <div class="rotulo">Offline</div>
-        <div class="valor" id="total-offline">-</div>
-      </div>
-      <div class="card resumo atencao">
-        <div class="rotulo">Atenção</div>
-        <div class="valor" id="total-atencao">-</div>
-      </div>
-      <div class="card resumo">
-        <div class="rotulo">Resposta média</div>
-        <div class="valor" id="tempo-medio">-</div>
-      </div>
-    </section>
-
-    <section class="card">
-      <h2>Serviços</h2>
-      <div class="tabela-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Serviço</th>
-              <th>Status</th>
-              <th>Resposta</th>
-              <th>Última verificação</th>
-              <th>Intervalo</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="tabela-servicos">
-            <tr><td colspan="6" class="vazio">Carregando…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <script type="module" src="../js/dashboard.js"></script>
+  <script type="module" src="../js/dashboard.js?v=4"></script>
 </body>
 </html>
-

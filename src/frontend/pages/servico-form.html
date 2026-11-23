@@ -4,90 +4,92 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serviço · Monitor</title>
-  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/base.css?v=5">
 </head>
 <body>
-  <header class="topo">
-    <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
-    <nav class="menu">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="servico-form.html" class="ativo">Novo serviço</a>
-    </nav>
-  </header>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar-app"></aside>
 
-  <main class="conteudo">
-    <div class="cabecalho-pagina">
-      <div>
-        <h1 id="titulo">Novo serviço</h1>
-        <p class="subtitulo">Informe o endereço e a frequência das verificações HTTP/HTTPS.</p>
-      </div>
-      <a class="botao" href="dashboard.html" id="btn-voltar">← Voltar</a>
-    </div>
+    <div class="area-principal">
+      <header class="topbar-mobile">
+        <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
+        <button class="botao pequeno" id="btn-abrir-sidebar">☰ Menu</button>
+      </header>
 
-    <div id="mensagem" class="alerta oculto"></div>
-
-    <form id="form-servico" class="card formulario" novalidate>
-      <div class="campo largo">
-        <label for="nome">Nome *</label>
-        <input id="nome" name="nome" required maxlength="100" placeholder="API Principal">
-        <span class="erro-campo" data-erro="Nome"></span>
-      </div>
-
-      <div class="campo">
-        <label for="tipo">Protocolo *</label>
-        <select id="tipo" name="tipo">
-          <option value="Https">HTTPS</option>
-          <option value="Http">HTTP</option>
-        </select>
-        <span class="erro-campo" data-erro="Tipo"></span>
-      </div>
-
-      <div class="campo">
-        <label for="endereco">Endereço (IP ou domínio) *</label>
-        <input id="endereco" name="endereco" required maxlength="255" placeholder="api.exemplo.com">
-        <span class="ajuda">Sem "https://" e sem caminho.</span>
-        <span class="erro-campo" data-erro="Endereco"></span>
-      </div>
-
-      <div class="campo">
-        <label for="porta">Porta</label>
-        <input id="porta" name="porta" type="number" min="1" max="65535" placeholder="Padrão (80/443)">
-        <span class="erro-campo" data-erro="Porta"></span>
-      </div>
-
-      <div class="campo">
-        <label for="endpoint">Endpoint</label>
-        <input id="endpoint" name="endpoint" maxlength="500" placeholder="/health" value="/">
-        <span class="erro-campo" data-erro="Endpoint"></span>
-      </div>
-
-      <div class="campo">
-        <label for="intervaloSegundos">Intervalo de verificação (segundos) *</label>
-        <input id="intervaloSegundos" name="intervaloSegundos" type="number" min="10" max="86400" value="60" required>
-        <span class="ajuda">Mínimo 10s, máximo 86400s (24h).</span>
-        <span class="erro-campo" data-erro="IntervaloSegundos"></span>
-      </div>
-
-      <div class="campo checkbox">
-        <input id="ativo" name="ativo" type="checkbox" checked>
-        <label for="ativo">Monitoramento ativo</label>
-      </div>
-
-      <div class="previa-url">
-        <span class="suave">URL verificada:</span>
-        <span class="mono" id="previa-url">https://…</span>
-      </div>
-
-      <div class="campo largo">
-        <div class="acoes">
-          <button type="submit" class="botao primario" id="btn-salvar">Salvar</button>
-          <a class="botao" href="dashboard.html" id="btn-cancelar">Cancelar</a>
+      <main class="conteudo">
+        <div class="cabecalho-pagina">
+          <div>
+            <h1 id="titulo">Novo serviço</h1>
+            <p class="subtitulo">Informe o endereço e a frequência das verificações HTTP/HTTPS.</p>
+          </div>
+          <a class="botao" href="dashboard.html" id="btn-voltar">← Voltar</a>
         </div>
-      </div>
-    </form>
-  </main>
 
-  <script type="module" src="../js/servico-form.js"></script>
+        <div id="mensagem" class="alerta oculto"></div>
+
+        <form id="form-servico" class="card formulario" novalidate>
+          <div class="campo largo">
+            <label for="nome">Nome *</label>
+            <input id="nome" name="nome" required maxlength="100" placeholder="API Principal">
+            <span class="erro-campo" data-erro="Nome"></span>
+          </div>
+
+          <div class="campo">
+            <label for="tipo">Protocolo *</label>
+            <select id="tipo" name="tipo">
+              <option value="Https">HTTPS</option>
+              <option value="Http">HTTP</option>
+            </select>
+            <span class="erro-campo" data-erro="Tipo"></span>
+          </div>
+
+          <div class="campo">
+            <label for="endereco">Endereço (IP ou domínio) *</label>
+            <input id="endereco" name="endereco" required maxlength="255" placeholder="api.exemplo.com">
+            <span class="ajuda">Sem "https://" e sem caminho.</span>
+            <span class="erro-campo" data-erro="Endereco"></span>
+          </div>
+
+          <div class="campo">
+            <label for="porta">Porta</label>
+            <input id="porta" name="porta" type="number" min="1" max="65535" placeholder="Padrão (80/443)">
+            <span class="erro-campo" data-erro="Porta"></span>
+          </div>
+
+          <div class="campo">
+            <label for="endpoint">Endpoint</label>
+            <input id="endpoint" name="endpoint" maxlength="500" placeholder="/health" value="/">
+            <span class="erro-campo" data-erro="Endpoint"></span>
+          </div>
+
+          <div class="campo">
+            <label for="intervaloSegundos">Intervalo de verificação (segundos) *</label>
+            <input id="intervaloSegundos" name="intervaloSegundos" type="number" min="10" max="86400" value="60" required>
+            <span class="ajuda">Mínimo 10s, máximo 86400s (24h).</span>
+            <span class="erro-campo" data-erro="IntervaloSegundos"></span>
+          </div>
+
+          <div class="campo checkbox">
+            <input id="ativo" name="ativo" type="checkbox" checked>
+            <label for="ativo">Monitoramento ativo</label>
+          </div>
+
+          <div class="previa-url">
+            <span class="suave">URL verificada:</span>
+            <span class="mono" id="previa-url">https://…</span>
+          </div>
+
+          <div class="campo largo">
+            <div class="acoes">
+              <button type="submit" class="botao primario" id="btn-salvar">Salvar serviço</button>
+              <a class="botao" href="dashboard.html" id="btn-cancelar">Cancelar</a>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="../js/servico-form.js?v=4"></script>
 </body>
 </html>
-

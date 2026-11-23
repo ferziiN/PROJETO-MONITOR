@@ -27,3 +27,28 @@ public enum StatusServico
     Atencao = 3
 }
 
+/// <summary>
+/// Categoria do alerta gerado pela transição de status de um serviço (Fase 7 / Sprint 5).
+/// </summary>
+public enum TipoAlerta
+{
+    /// <summary>Serviço ficou indisponível (Offline).</summary>
+    Indisponibilidade = 1,
+
+    /// <summary>Serviço respondeu acima do limite de latência (Atenção).</summary>
+    Lentidao = 2,
+
+    /// <summary>Serviço voltou a responder normalmente (Online).</summary>
+    Recuperacao = 3
+}
+
+/// <summary>
+/// Perfil de acesso do usuário na plataforma.
+/// - Admin: acesso total a todas as telas e operações (cadastro, edição, exclusão).
+/// - Usuario: acesso controlado (permissões específicas definidas conforme evolução do projeto).
+/// </summary>
+public enum PerfilUsuario
+{
+    Admin = 1,
+    Usuario = 2
+}
