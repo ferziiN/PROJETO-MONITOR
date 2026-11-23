@@ -1,6 +1,6 @@
-import { api } from "./api.js?v=4";
-import { inicializarLayout } from "./layout.js?v=4";
-import { esconderMensagem, mostrarMensagem, obterParametroUrl } from "./utils.js?v=4";
+import { api } from "./api.js?v=6";
+import { inicializarLayout } from "./layout.js?v=6";
+import { esconderMensagem, mostrarMensagem, obterParametroUrl } from "./utils.js?v=6";
 
 inicializarLayout({ telaAtiva: "servico-form" });
 

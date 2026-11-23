@@ -1,11 +1,12 @@
-import { api } from "./api.js?v=4";
-import { podeExecutarAcao } from "./auth.js?v=4";
-import { CONFIG } from "./config.js?v=4";
-import { inicializarLayout } from "./layout.js?v=4";
+import { api } from "./api.js?v=6";
+import { podeExecutarAcao } from "./auth.js?v=6";
+import { CONFIG } from "./config.js?v=6";
+import { inicializarLayout } from "./layout.js?v=6";
 import {
-  ajustarFonteCards, badgeStatus, escapar, esconderMensagem, formatarDataHora, formatarIntervalo,
-  formatarMs, mostrarMensagem, obterParametroUrl, tempoRelativo,
-} from "./utils.js?v=4";
+  ajustarFonteCards, badgeStatus, confirmarModal, escapar, esconderMensagem,
+  exibirToast, formatarDataHora, formatarIntervalo, formatarMs,
+  mostrarMensagem, obterParametroUrl, tempoRelativo,
+} from "./utils.js?v=6";
 
 const sessao = inicializarLayout({ telaAtiva: "servico-detalhe", abaAtiva: "dashboard" });
 const id = obterParametroUrl("id");
@@ -42,7 +43,7 @@ function renderizarServico(s) {
   el.url.textContent = s.url;
   el.statusAtual.innerHTML = s.ativo ? badgeStatus(s.statusAtual) : '<span class="suave">Pausado</span>';
   el.ultimaResposta.textContent = formatarMs(s.ultimoTempoRespostaMs);
-  el.btnAtivo.textContent = s.ativo ? "⏸ Pausar" : "▶ Retomar";
+  el.btnAtivo.textContent = s.ativo ? "Pausar" : "Retomar";
   el.btnEditar.href = `servico-form.html?id=${s.id}`;
 
   const itens = [
@@ -73,15 +74,9 @@ function renderizarMetricas(m) {
   el.resumoGrafico.textContent = `Últimas verificações${faixa}`;
 }
 
-/**
- * Renderiza o gráfico SVG de curva de latência e a barra visual de uptime (estilo UptimeRobot/Statuspage)
- * sem depender de bibliotecas externas bloqueáveis por CDN.
- */
 function renderizarGrafico(verificacoes) {
-  // Ordena cronologicamente (mais antigas à esquerda, mais recentes à direita)
   const cronologico = [...verificacoes].reverse();
 
-  // Barra de blocos de status (uptime bar)
   if (cronologico.length === 0) {
     el.barraUptime.innerHTML = "";
     el.graficoLatencia.innerHTML = '<div class="vazio">Sem dados suficientes para exibir o gráfico.</div>';
@@ -115,7 +110,7 @@ function renderizarGrafico(verificacoes) {
   const area = `0,${altura} ${polyline} ${largura},${altura}`;
 
   const circulos = pontos.map((p) => {
-    const cor = p.v.status === "Offline" ? "#ef4444" : p.v.status === "Atencao" ? "#eab308" : "#3b82f6";
+    const cor = p.v.status === "Offline" ? "#ff453a" : p.v.status === "Atencao" ? "#ffd60a" : "#0a84ff";
     const dica = `${formatarDataHora(p.v.verificadoEm)}: ${p.v.status} (${formatarMs(p.v.tempoRespostaMs)})`;
     return `<circle cx="${p.x}" cy="${p.y}" r="3.8" fill="${cor}"><title>${escapar(dica)}</title></circle>`;
   }).join("");
@@ -124,14 +119,14 @@ function renderizarGrafico(verificacoes) {
     <svg class="grafico-svg" viewBox="0 0 ${largura} ${altura}" preserveAspectRatio="none">
       <defs>
         <linearGradient id="gradLatencia" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.35"/>
-          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"/>
+          <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#0a84ff" stop-opacity="0.0"/>
         </linearGradient>
       </defs>
-      <line x1="0" y1="14" x2="${largura}" y2="14" stroke="#2a3744" stroke-dasharray="4 4"/>
-      <text x="4" y="11" fill="#8b98a5" font-size="10">${maxMs} ms</text>
+      <line x1="0" y1="14" x2="${largura}" y2="14" stroke="rgba(255,255,255,0.1)" stroke-dasharray="4 4"/>
+      <text x="4" y="11" fill="#8e9bae" font-size="10">${maxMs} ms</text>
       <polygon points="${area}" fill="url(#gradLatencia)"/>
-      <polyline fill="none" stroke="#3b82f6" stroke-width="2" points="${polyline}"/>
+      <polyline fill="none" stroke="#0a84ff" stroke-width="2" points="${polyline}"/>
       ${circulos}
     </svg>`;
 }
@@ -174,7 +169,7 @@ async function executarAcao(botao, acao) {
   try {
     const msgSucesso = await acao();
     await carregar();
-    if (typeof msgSucesso === "string") mostrarMensagem(el.mensagem, msgSucesso, "sucesso");
+    if (typeof msgSucesso === "string") exibirToast(msgSucesso, "sucesso");
   } catch (erro) {
     mostrarMensagem(el.mensagem, erro.message);
   } finally {
@@ -198,10 +193,21 @@ el.btnVerificar.addEventListener("click", () =>
   }));
 
 el.btnAtivo.addEventListener("click", () =>
-  executarAcao(el.btnAtivo, () => api.alterarMonitoramento(id, !servicoAtual?.ativo)));
+  executarAcao(el.btnAtivo, async () => {
+    const novoEstado = !servicoAtual?.ativo;
+    await api.alterarMonitoramento(id, novoEstado);
+    return novoEstado ? "Monitoramento retomado." : "Monitoramento pausado.";
+  }));
 
 el.btnExcluir.addEventListener("click", async () => {
-  if (!confirm(`Excluir "${servicoAtual?.nome}" e todo o seu histórico?`)) return;
+  const confirmado = await confirmarModal({
+    titulo: "Excluir serviço",
+    mensagem: `Deseja excluir "${servicoAtual?.nome}" e todo o seu histórico de verificações?`,
+    textoConfirmar: "Excluir permanentemente",
+    perigo: true,
+  });
+  if (!confirmado) return;
+
   try {
     await api.removerServico(id);
     window.location.href = "dashboard.html";

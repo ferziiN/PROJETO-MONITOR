@@ -1,12 +1,21 @@
 import {
   ehAdmin, encerrarSessao, exigirAutenticacao,
   PERMISSOES_POR_PERFIL, podeAcessarTela,
-} from "./auth.js?v=4";
-import { escapar } from "./utils.js?v=4";
+} from "./auth.js?v=6";
+import { escapar, exibirToast } from "./utils.js?v=6";
+
+/** Ícones vetoriais SVG estilo Apple SF Symbols (monocromáticos, herdam currentColor). */
+const ICONES_SF = {
+  home: `<svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9 21v-6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v6"/></svg>`,
+  plus: `<svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>`,
+  bolt: `<svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>`,
+  lock: `<svg class="icone-svg pequeno" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
+  logout: `<svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+};
 
 /**
- * Injeta a Sidebar lateral retrátil com geometria fixa (sem saltos de altura ou posição
- * durante a animação de abertura/fechamento por hover).
+ * Injeta a Sidebar lateral retrátil com translucidez (macOS Vibrancy) no desktop
+ * e Bottom Tab Bar estilo iOS no mobile.
  */
 export function inicializarLayout({ telaAtiva, abaAtiva = telaAtiva }) {
   const sessao = exigirAutenticacao(telaAtiva);
@@ -23,14 +32,14 @@ export function inicializarLayout({ telaAtiva, abaAtiva = telaAtiva }) {
   const itensMenu = [
     {
       id: "dashboard",
-      icone: "🏠",
+      icone: ICONES_SF.home,
       rotulo: "Home · Dashboard",
       href: "dashboard.html",
       liberado: true,
     },
     {
       id: "servico-form",
-      icone: "➕",
+      icone: ICONES_SF.plus,
       rotulo: "Cadastrar Serviço",
       href: podeCadastrar ? "servico-form.html" : "#",
       liberado: podeCadastrar,
@@ -38,7 +47,7 @@ export function inicializarLayout({ telaAtiva, abaAtiva = telaAtiva }) {
     },
     {
       id: "api-docs",
-      icone: "⚡",
+      icone: ICONES_SF.bolt,
       rotulo: "API Docs (Scalar)",
       href: "/scalar",
       externo: true,
@@ -47,6 +56,7 @@ export function inicializarLayout({ telaAtiva, abaAtiva = telaAtiva }) {
     },
   ];
 
+  containerSidebar.setAttribute("aria-label", "Navegação principal");
   containerSidebar.innerHTML = `
     <div class="sidebar-topo">
       <a class="sidebar-item-linha marca-sidebar" href="dashboard.html" title="Monitor — Home">
@@ -61,7 +71,7 @@ export function inicializarLayout({ telaAtiva, abaAtiva = telaAtiva }) {
         const bloqueado = !item.liberado ? "bloqueado" : "";
         const alvo = item.externo ? 'target="_blank" rel="noopener"' : "";
         const tagRestrito = item.restritoAdmin && !admin
-          ? `<span class="tag-permissao restrito">🔒</span>`
+          ? `<span class="tag-permissao restrito" title="Exclusivo ADMIN">${ICONES_SF.lock}</span>`
           : "";
 
         return `
@@ -70,6 +80,7 @@ export function inicializarLayout({ telaAtiva, abaAtiva = telaAtiva }) {
              data-menu-id="${item.id}"
              data-liberado="${item.liberado}"
              title="${escapar(item.rotulo)}"
+             ${ativo ? 'aria-current="page"' : ""}
              ${alvo}>
             <span class="sidebar-slot-icone">${item.icone}</span>
             <span class="sidebar-texto sidebar-colapsavel">${item.rotulo}</span>
@@ -90,17 +101,17 @@ export function inicializarLayout({ telaAtiva, abaAtiva = telaAtiva }) {
       </div>
 
       <button class="botao btn-logout" id="btn-logout" title="Sair / Trocar conta">
-        <span class="sidebar-slot-icone">⇥</span>
+        <span class="sidebar-slot-icone">${ICONES_SF.logout}</span>
         <span class="sidebar-colapsavel">Sair da conta</span>
       </button>
     </div>
   `;
 
-  // Intercepta clique em itens restritos ao ADMIN quando logado como USUÁRIO
+  // Feedback não-bloqueante via Toast quando logado como USUÁRIO e clicar em item restrito
   containerSidebar.querySelectorAll('.sidebar-link[data-liberado="false"]').forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      alert("Acesso restrito ao perfil ADMIN. Os acessos autorizados para o perfil USUÁRIO serão habilitados conforme definição da equipe.");
+      exibirToast("Acesso restrito ao perfil ADMIN.", "erro");
     });
   });
 

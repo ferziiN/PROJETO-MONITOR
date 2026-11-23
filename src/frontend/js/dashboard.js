@@ -1,11 +1,11 @@
-import { api } from "./api.js?v=4";
-import { ehAdmin, podeAcessarTela, podeExecutarAcao } from "./auth.js?v=4";
-import { CONFIG } from "./config.js?v=4";
-import { atualizarContadorAlertasSidebar, inicializarLayout } from "./layout.js?v=4";
+import { api } from "./api.js?v=6";
+import { ehAdmin, podeAcessarTela, podeExecutarAcao } from "./auth.js?v=6";
+import { CONFIG } from "./config.js?v=6";
+import { atualizarContadorAlertasSidebar, inicializarLayout } from "./layout.js?v=6";
 import {
-  ajustarFonteCards, badgeStatus, escapar, esconderMensagem, formatarIntervalo,
-  formatarMs, mostrarMensagem, obterParametroUrl, tempoRelativo,
-} from "./utils.js?v=4";
+  ajustarFonteCards, badgeStatus, escapar, esconderMensagem, exibirToast,
+  formatarIntervalo, formatarMs, mostrarMensagem, obterParametroUrl, tempoRelativo,
+} from "./utils.js?v=6";
 
 const sessao = inicializarLayout({ telaAtiva: "dashboard" });
 const admin = ehAdmin(sessao);
@@ -48,10 +48,7 @@ function aplicarContextoUsuario() {
     el.atalhoCadastrar.href = "#";
     el.atalhoCadastrar.addEventListener("click", (e) => {
       e.preventDefault();
-      mostrarMensagem(
-        el.mensagem,
-        "O cadastro de novos serviços é exclusivo do perfil ADMIN. Os acessos do perfil USUÁRIO são controlados pela equipe.",
-      );
+      exibirToast("O cadastro de novos serviços é exclusivo do perfil ADMIN.", "erro");
     });
   }
 
@@ -60,10 +57,7 @@ function aplicarContextoUsuario() {
   }
 
   if (obterParametroUrl("acessoNegado") === "1") {
-    mostrarMensagem(
-      el.mensagem,
-      "Acesso restrito ao perfil ADMIN. Você foi redirecionado para a Home.",
-    );
+    exibirToast("Acesso restrito ao perfil ADMIN.", "erro");
   }
 }
 
@@ -103,6 +97,7 @@ function renderizarAlertas(alertas = []) {
     btn.addEventListener("click", async () => {
       btn.disabled = true;
       await api.reconhecerAlerta(btn.dataset.reconhecer);
+      exibirToast("Alerta reconhecido.");
       await carregar();
     });
   });
@@ -153,9 +148,7 @@ function renderizarTabela() {
 async function carregar() {
   try {
     const dados = await api.dashboard();
-    if (obterParametroUrl("acessoNegado") !== "1") {
-      esconderMensagem(el.mensagem);
-    }
+    esconderMensagem(el.mensagem);
     listaServicosCache = dados.servicos ?? [];
     renderizarResumo(dados);
     renderizarAlertas(dados.alertasRecentes ?? []);
@@ -167,11 +160,19 @@ async function carregar() {
   }
 }
 
-el.btnAtualizar.addEventListener("click", carregar);
+el.btnAtualizar.addEventListener("click", async () => {
+  el.btnAtualizar.disabled = true;
+  el.btnAtualizar.textContent = "↻ Atualizando…";
+  await carregar();
+  el.btnAtualizar.disabled = false;
+  el.btnAtualizar.textContent = "↻ Atualizar agora";
+});
+
 el.filtroBusca.addEventListener("input", renderizarTabela);
 el.filtroStatus.addEventListener("change", renderizarTabela);
 el.btnReconhecerTodos.addEventListener("click", async () => {
   await api.reconhecerTodosAlertas();
+  exibirToast("Todos os alertas pendentes foram reconhecidos.");
   await carregar();
 });
 
@@ -183,7 +184,7 @@ el.atalhoVerificarTodos.addEventListener("click", async () => {
   try {
     await Promise.all(ativos.map((s) => api.verificarAgora(s.id)));
     await carregar();
-    mostrarMensagem(el.mensagem, `Varredura concluída em ${ativos.length} serviço(s)!`, "sucesso");
+    exibirToast(`Varredura concluída em ${ativos.length} serviço(s)!`);
   } catch (erro) {
     mostrarMensagem(el.mensagem, erro.message);
   } finally {

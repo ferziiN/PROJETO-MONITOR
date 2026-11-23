@@ -4,18 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home · Dashboard · Monitor</title>
-  <link rel="stylesheet" href="../css/base.css?v=5">
+  <link rel="stylesheet" href="../css/base.css?v=6">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar-app"></aside>
 
     <div class="area-principal">
-      <header class="topbar-mobile">
-        <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
-        <button class="botao pequeno" id="btn-abrir-sidebar">☰ Menu</button>
-      </header>
-
       <main class="conteudo">
         <!-- Hero Banner da Home -->
         <section class="hero-home">
@@ -32,12 +27,14 @@
           </div>
         </section>
 
-        <div id="mensagem" class="alerta oculto"></div>
+        <div id="mensagem" class="alerta oculto" role="status" aria-live="polite"></div>
 
-        <!-- Atalhos Rápidos da Home -->
+        <!-- Atalhos Rápidos da Home (Ícones Vetoriais SF Style) -->
         <section class="grade-atalhos">
           <a class="card-atalho" id="atalho-cadastrar" href="servico-form.html">
-            <div class="atalho-icone">➕</div>
+            <div class="atalho-icone">
+              <svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/></svg>
+            </div>
             <div>
               <div class="atalho-titulo">Cadastrar Serviço</div>
               <div class="atalho-desc">Adicionar novo host HTTP/HTTPS</div>
@@ -45,7 +42,9 @@
           </a>
 
           <button type="button" class="card-atalho" id="atalho-verificar-todos">
-            <div class="atalho-icone">⚡</div>
+            <div class="atalho-icone">
+              <svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+            </div>
             <div>
               <div class="atalho-titulo">Varredura Imediata</div>
               <div class="atalho-desc">Checar todos os serviços ativos</div>
@@ -53,7 +52,9 @@
           </button>
 
           <a class="card-atalho" href="#secao-alertas">
-            <div class="atalho-icone">🔔</div>
+            <div class="atalho-icone">
+              <svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
             <div>
               <div class="atalho-titulo">Central de Alertas</div>
               <div class="atalho-desc">Acompanhar quedas e recuperações</div>
@@ -61,7 +62,9 @@
           </a>
 
           <a class="card-atalho" href="#secao-servicos">
-            <div class="atalho-icone">🖥️</div>
+            <div class="atalho-icone">
+              <svg class="icone-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="3" width="20" height="7" rx="2"/><rect x="2" y="14" width="20" height="7" rx="2"/><circle cx="6" cy="6.5" r="1"/><circle cx="6" cy="17.5" r="1"/></svg>
+            </div>
             <div>
               <div class="atalho-titulo">Frota Monitorada</div>
               <div class="atalho-desc">Filtrar servidores por status</div>
@@ -70,7 +73,7 @@
         </section>
 
         <!-- Cards de Indicadores (KPIs) -->
-        <section class="grade-resumo">
+        <section class="grade-resumo" aria-label="Indicadores de disponibilidade">
           <div class="card resumo total">
             <div class="rotulo">Monitorados</div>
             <div class="valor" id="total-ativos">-</div>
@@ -100,7 +103,7 @@
         <!-- Central de Alertas -->
         <section class="card oculto" id="secao-alertas">
           <div class="cabecalho-card">
-            <h2>🔔 Central de Alertas Recentes</h2>
+            <h2>Central de Alertas Recentes</h2>
             <button class="botao pequeno" id="btn-reconhecer-todos">✓ Reconhecer pendentes</button>
           </div>
           <div class="lista-alertas" id="lista-alertas"></div>
@@ -109,10 +112,10 @@
         <!-- Lista de Serviços Monitorados -->
         <section class="card" id="secao-servicos">
           <div class="cabecalho-card">
-            <h2>🖥️ Serviços Monitorados</h2>
+            <h2>Serviços Monitorados</h2>
             <div class="barra-filtros">
-              <input type="search" id="filtro-busca" placeholder="Buscar por nome ou URL…">
-              <select id="filtro-status">
+              <input type="search" id="filtro-busca" placeholder="Buscar por nome ou URL…" aria-label="Buscar serviço por nome ou URL">
+              <select id="filtro-status" aria-label="Filtrar por status">
                 <option value="">Todos os status</option>
                 <option value="Online">Online</option>
                 <option value="Offline">Offline</option>
@@ -144,6 +147,6 @@
     </div>
   </div>
 
-  <script type="module" src="../js/dashboard.js?v=4"></script>
+  <script type="module" src="../js/dashboard.js?v=6"></script>
 </body>
 </html>

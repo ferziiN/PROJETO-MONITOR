@@ -1,4 +1,4 @@
-import { api } from "./api.js?v=4";
+import { api } from "./api.js?v=6";
 
 const CHAVE_SESSAO = "monitor.sessao";
 

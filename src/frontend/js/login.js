@@ -1,5 +1,5 @@
-import { obterSessao, realizarLogin } from "./auth.js?v=4";
-import { esconderMensagem, mostrarMensagem } from "./utils.js?v=4";
+import { obterSessao, realizarLogin } from "./auth.js?v=6";
+import { esconderMensagem, mostrarMensagem } from "./utils.js?v=6";
 
 // Se já estiver autenticado, vai direto para a Home/Dashboard
 if (obterSessao()) {

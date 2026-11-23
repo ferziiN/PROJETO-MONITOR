@@ -4,28 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serviço · Monitor</title>
-  <link rel="stylesheet" href="../css/base.css?v=5">
+  <link rel="stylesheet" href="../css/base.css?v=6">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar-app"></aside>
 
     <div class="area-principal">
-      <header class="topbar-mobile">
-        <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
-        <button class="botao pequeno" id="btn-abrir-sidebar">☰ Menu</button>
-      </header>
-
       <main class="conteudo">
         <div class="cabecalho-pagina">
           <div>
+            <a class="breadcrumb-topo" href="dashboard.html" id="btn-voltar">← Voltar para Home · Dashboard</a>
             <h1 id="titulo">Novo serviço</h1>
             <p class="subtitulo">Informe o endereço e a frequência das verificações HTTP/HTTPS.</p>
           </div>
-          <a class="botao" href="dashboard.html" id="btn-voltar">← Voltar</a>
         </div>
 
-        <div id="mensagem" class="alerta oculto"></div>
+        <div id="mensagem" class="alerta oculto" role="status" aria-live="polite"></div>
 
         <form id="form-servico" class="card formulario" novalidate>
           <div class="campo largo">
@@ -70,7 +65,7 @@
           </div>
 
           <div class="campo checkbox">
-            <input id="ativo" name="ativo" type="checkbox" checked>
+            <input id="ativo" name="ativo" type="checkbox" checked role="switch">
             <label for="ativo">Monitoramento ativo</label>
           </div>
 
@@ -90,6 +85,6 @@
     </div>
   </div>
 
-  <script type="module" src="../js/servico-form.js?v=4"></script>
+  <script type="module" src="../js/servico-form.js?v=6"></script>
 </body>
 </html>

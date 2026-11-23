@@ -4,36 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detalhes do serviço · Monitor</title>
-  <link rel="stylesheet" href="../css/base.css?v=5">
+  <link rel="stylesheet" href="../css/base.css?v=6">
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar-app"></aside>
 
     <div class="area-principal">
-      <header class="topbar-mobile">
-        <a class="marca" href="dashboard.html"><span class="pulso"></span>MONITOR</a>
-        <button class="botao pequeno" id="btn-abrir-sidebar">☰ Menu</button>
-      </header>
-
       <main class="conteudo">
         <div class="cabecalho-pagina">
           <div>
+            <a class="breadcrumb-topo" href="dashboard.html">← Voltar para Home · Dashboard</a>
             <h1 id="nome">Carregando…</h1>
             <p class="subtitulo mono" id="url"></p>
           </div>
           <div class="acoes">
-            <button class="botao" id="btn-verificar">⚡ Verificar agora</button>
+            <button class="botao primario" id="btn-verificar">Verificar agora</button>
             <button class="botao" id="btn-ativo">Pausar</button>
             <a class="botao" id="btn-editar" href="#">Editar</a>
             <button class="botao perigo" id="btn-excluir">Excluir</button>
           </div>
         </div>
 
-        <div id="mensagem" class="alerta oculto"></div>
+        <div id="mensagem" class="alerta oculto" role="status" aria-live="polite"></div>
 
-        <section class="grade-resumo">
-          <div class="card resumo">
+        <section class="grade-resumo" aria-label="Resumo do serviço">
+          <div class="card resumo total">
             <div class="rotulo">Status atual</div>
             <div class="valor" id="status-atual" style="font-size:1.25rem">-</div>
           </div>
@@ -57,7 +53,7 @@
               <h2>Tempo de resposta & disponibilidade recente</h2>
               <p class="subtitulo" id="resumo-grafico">Últimas 40 verificações</p>
             </div>
-            <div class="acoes" id="seletor-periodo">
+            <div class="segmented-control" id="seletor-periodo" role="group" aria-label="Período das métricas">
               <button class="botao pequeno" data-periodo="1h">1h</button>
               <button class="botao pequeno ativo" data-periodo="24h">24h</button>
               <button class="botao pequeno" data-periodo="7d">7d</button>
@@ -96,6 +92,6 @@
     </div>
   </div>
 
-  <script type="module" src="../js/servico-detalhe.js?v=4"></script>
+  <script type="module" src="../js/servico-detalhe.js?v=6"></script>
 </body>
 </html>

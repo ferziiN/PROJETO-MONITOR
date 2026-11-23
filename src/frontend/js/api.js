@@ -1,4 +1,4 @@
-import { CONFIG } from "./config.js?v=4";
+import { CONFIG } from "./config.js?v=6";
 
 /**
  * Erro lançado quando a API responde com status de erro.
