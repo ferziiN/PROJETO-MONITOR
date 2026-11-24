@@ -1,5 +1,10 @@
 {
   "omnisharp.useModernNet": true,
   "omnisharp.defaultLaunchSolution": "ProjetoMonitor.sln",
-  "dotnet.defaultSolution": "ProjetoMonitor.sln"
+  "dotnet.defaultSolution": "ProjetoMonitor.sln",
+  "omnisharp.dotNetCliPaths": [
+    "C:\\Program Files\\dotnet"
+  ],
+  "omnisharp.sdkPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401",
+  "omnisharp.enableMsBuildLoadProjectsOnDemand": false
 }
